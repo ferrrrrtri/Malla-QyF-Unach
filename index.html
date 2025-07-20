@@ -5,24 +5,27 @@
   <title>Malla Interactiva QyF UNACH</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@700&display=swap');
+
+    /* Base/Default (Light) Theme */
     :root {
-      /* Colores para el modo claro */
-      --bg: #e0f7fa;
+      --bg: #e0f7fa; /* Light Blue */
       --text: #333;
       --card: #fff;
-      --accent: #1565C0;
-      --accent2: #42A5F5;
-      --green: #10B981;
-      --yellow: #FACC15;
-      --lila: #9C27B0;
-      --red: #EF5350;
+      --accent: #1565C0; /* Strong Blue */
+      --accent2: #42A5F5; /* Lighter Blue */
+      --green: #10B981; /* Teal Green */
+      --yellow: #FACC15; /* Amber Yellow */
+      --lila: #9C27B0; /* Deep Purple */
+      --red: #EF5350; /* Red */
       --shadow: rgba(0,0,0,0.1);
-      --ramo-bg: #eceff1;
-      --ramo-aprobado-bg: #e1f5fe;
-      --ramo-desbloqueado-bg: #fff8e1;
+      --ramo-bg: #eceff1; /* Light Gray Blue */
+      --ramo-aprobado-bg: #e1f5fe; /* Very Light Blue */
+      --ramo-desbloqueado-bg: #fff8e1; /* Very Light Yellow */
+      --creditos-bg: rgba(255, 255, 255, 0.8); /* Slightly transparent white for credits */
     }
+
+    /* Dark Theme */
     body.dark {
-      /* Colores para el modo oscuro */
       --bg: #1a1a1a;
       --text: #eee;
       --card: #2c2c2c;
@@ -36,7 +39,81 @@
       --ramo-bg: #3c3c3c;
       --ramo-aprobado-bg: #30475e;
       --ramo-desbloqueado-bg: #5f4b00;
+      --creditos-bg: rgba(44, 44, 44, 0.8); /* Slightly transparent dark for credits */
     }
+
+    /* Pastel Theme */
+    body.pastel {
+      --bg: #f8e1fa; /* Light pink/purple */
+      --text: #5d3f6a; /* Darker purple */
+      --card: #fefefe;
+      --accent: #d8a7e0; /* Medium purple */
+      --accent2: #e9c3f0; /* Lighter purple */
+      --green: #a7d8b0; /* Pastel green */
+      --yellow: #f0e68c; /* Khaki */
+      --lila: #c3a7e0;
+      --red: #f0a7a7;
+      --shadow: rgba(0,0,0,0.1);
+      --ramo-bg: #f3e9f5;
+      --ramo-aprobado-bg: #e0f0e0;
+      --ramo-desbloqueado-bg: #f5f5e0;
+      --creditos-bg: rgba(254, 254, 254, 0.8);
+    }
+
+    /* Celeste Theme */
+    body.celeste {
+      --bg: #e0f7fa; /* Light blue */
+      --text: #004d40; /* Dark teal */
+      --card: #ffffff;
+      --accent: #00838f; /* Cyan dark */
+      --accent2: #00acc1; /* Cyan light */
+      --green: #4db6ac; /* Greenish blue */
+      --yellow: #ffb74d; /* Orange */
+      --lila: #7986cb; /* Indigo */
+      --red: #ef5350;
+      --shadow: rgba(0,0,0,0.1);
+      --ramo-bg: #e0f2f7;
+      --ramo-aprobado-bg: #b2ebf2;
+      --ramo-desbloqueado-bg: #ffe0b2;
+      --creditos-bg: rgba(255, 255, 255, 0.8);
+    }
+
+    /* Rosado Theme */
+    body.rosado {
+      --bg: #ffebee; /* Very light pink */
+      --text: #880e4f; /* Darker pink */
+      --card: #ffffff;
+      --accent: #c2185b; /* Medium pink */
+      --accent2: #e91e63; /* Brighter pink */
+      --green: #a5d6a7; /* Light green */
+      --yellow: #ffcc80; /* Light orange */
+      --lila: #ce93d8; /* Light purple */
+      --red: #ef9a9a;
+      --shadow: rgba(0,0,0,0.1);
+      --ramo-bg: #fce4ec;
+      --ramo-aprobado-bg: #f8bbd0;
+      --ramo-desbloqueado-bg: #fff9c4;
+      --creditos-bg: rgba(255, 255, 255, 0.8);
+    }
+
+    /* Verde Theme */
+    body.verde {
+      --bg: #e8f5e9; /* Very light green */
+      --text: #1b5e20; /* Dark green */
+      --card: #ffffff;
+      --accent: #388e3c; /* Medium green */
+      --accent2: #4caf50; /* Brighter green */
+      --green: #81c784; /* Light green */
+      --yellow: #fff176; /* Light yellow */
+      --lila: #9ccc65; /* Lime green */
+      --red: #ef5350;
+      --shadow: rgba(0,0,0,0.1);
+      --ramo-bg: #e0f2f1;
+      --ramo-aprobado-bg: #c8e6c9;
+      --ramo-desbloqueado-bg: #fffde7;
+      --creditos-bg: rgba(255, 255, 255, 0.8);
+    }
+
     * { box-sizing: border-box; }
     body {
       margin: 0; font-family: 'Inter', sans-serif;
@@ -91,20 +168,16 @@
       border-radius: 4px; font-family: monospace; min-width: 60px;
       text-align: center;
     }
-    /* SWITCH */
-    .switch { position: relative; display: inline-block; width: 50px; height: 24px; }
-    .switch input { opacity: 0; width: 0; height: 0; }
-    .slider {
-      position: absolute; cursor: pointer;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: #ccc; transition: .4s; border-radius: 24px;
+    /* Theme Selector */
+    #theme-selector {
+        padding: 6px 8px;
+        border: none;
+        border-radius: 4px;
+        font-size: .9em;
+        background: var(--card); /* Color de fondo para inputs/selects */
+        color: var(--text); /* Color de texto para inputs/selects */
     }
-    .slider:before {
-      position: absolute; content: "";
-      height: 16px; width: 16px; left: 4px; bottom: 4px;
-      background: white; transition: .4s; border-radius: 50%;
-    }
-    input:checked + .slider { transform: translateX(26px); }
+
     /* BARRA SECUNDARIA */
     #topbar {
       display: flex; align-items: center; justify-content: space-between;
@@ -113,7 +186,38 @@
       box-shadow: 0 2px 4px var(--shadow);
       font-size: .9em;
     }
-    #regimen { display: flex; gap: 16px; flex-wrap: wrap; }
+    #regimen {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        /* Estilos para el details/summary */
+        background: rgba(255,255,255,0.1);
+        padding: 5px 10px;
+        border-radius: 8px;
+        transition: background 0.2s ease;
+    }
+    #regimen summary {
+        cursor: pointer;
+        font-weight: 600;
+        outline: none; /* Quitar el contorno al hacer clic */
+    }
+    #regimen summary::-webkit-details-marker {
+        display: none; /* Ocultar el marcador predeterminado */
+    }
+    #regimen summary:before {
+        content: '+ '; /* Añadir un marcador personalizado */
+        margin-right: 5px;
+    }
+    #regimen[open] summary:before {
+        content: '- '; /* Cambiar el marcador cuando está abierto */
+    }
+    #regimen div {
+        margin-top: 5px; /* Espacio para el contenido desplegado */
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
     #topbar-controls {
       display: flex; align-items: center; gap: 12px;
     }
@@ -139,6 +243,11 @@
         display: flex;
         align-items: center;
         gap: 8px;
+        background: var(--creditos-bg); /* Fondo similar al card, pero distinto */
+        padding: 8px 12px;
+        border-radius: 8px; /* Bordes redondeados */
+        box-shadow: 0 1px 3px var(--shadow); /* Sombra ligera */
+        color: var(--text); /* Asegura que el texto sea visible */
     }
     #creditos-info .dot {
         width: 8px;
@@ -553,21 +662,29 @@
     </div>
     <div id="header-right">
       Zoom <input id="zoom" type="range" min="50" max="150" value="100"/>%
-      <label class="switch">
-        <input type="checkbox" id="theme-switch">
-        <span class="slider"></span>
-      </label>
+      <label for="theme-selector">Tema:</label>
+      <select id="theme-selector">
+        <option value="light">Claro</option>
+        <option value="dark">Oscuro</option>
+        <option value="pastel">Pastel</option>
+        <option value="celeste">Celeste</option>
+        <option value="rosado">Rosado</option>
+        <option value="verde">Verde</option>
+      </select>
       <div id="clock"></div>
     </div>
   </header>
 
   <!-- BARRA SECUNDARIA -->
   <div id="topbar">
-    <div id="regimen">
-      RÉGIMEN ESTUDIO: SEMESTRAL&nbsp;|&nbsp;
-      DURACIÓN: 11 SEMESTRES&nbsp;|&nbsp;
-      JORNADA: DIURNA
-    </div>
+    <details id="regimen">
+      <summary>RÉGIMEN ESTUDIO</summary>
+      <div>
+        <span>SEMESTRAL</span>
+        <span>DURACIÓN: 11 SEMESTRES</span>
+        <span>JORNADA: DIURNA</span>
+      </div>
+    </details>
     <div id="topbar-controls">
       <!-- Botón de información del tr._nico -->
       <button id="tr-nico-info-btn" class="btn-info">?</button>
@@ -645,7 +762,10 @@
           <h4>Biblioteca UNACH</h4>
           <a href="https://biblioteca.unach.cl/basesdatossuscritas/" target="_blank">Ir a la Biblioteca</a>
         </div>
-        <!-- La calculadora de promedio semestral ha sido eliminada -->
+        <div class="widget-card">
+          <h4>Google Académico</h4>
+          <a href="https://scholar.google.es/?hl=es" target="_blank">Buscar Artículos</a>
+        </div>
       </div>
     </div>
 
@@ -684,7 +804,6 @@
             <div class="ramo" data-code="QYFTAP601" data-area="general" data-creditos="3" data-desc="Taller para el desarrollo de habilidades de estudio y aprendizaje.">
               <span class="dot area-general"></span>Taller de Habilidades de Aprendizaje I
             </div>
-            <!-- QYFCSE601 - Crédito Sello I (0) ha sido eliminado -->
           </div>
           <div class="semestre" data-sem="2">
             <div class="progress"><div class="progress-fill"></div></div>
@@ -767,7 +886,6 @@
             <div class="ramo" data-code="QYFCMP602"  data-req="QYFCMP601" data-area="general" data-creditos="1" data-desc="Asignatura complementaria de libre elección.">
               <span class="dot area-general"></span>Complementario II
             </div>
-            <!-- QYFCSE602 - Crédito Sello II (0) ha sido eliminado -->
           </div>
         </div>
         <!-- Año 3 -->
@@ -823,7 +941,6 @@
             <div class="ramo" data-code="QYFCMP604"  data-req="QYFCMP603" data-area="general" data-creditos="1" data-desc="Asignatura complementaria de libre elección.">
               <span class="dot area-general"></span>Complementario IV
             </div>
-            <!-- QYFCSE603 - Crédito Sello III (0) ha sido eliminado -->
           </div>
         </div>
         <!-- Año 4 -->
@@ -879,7 +996,6 @@
             <div class="ramo" data-code="QYFPFP600" data-req="QYFFCA600" data-area="practica" data-creditos="4" data-desc="Práctica profesional en farmacias privadas.">
               <span class="dot area-practica"></span>Práctica Farmacia Privada
             </div>
-            <!-- QYFCSE604 - Crédito Sello IV (0) ha sido eliminado -->
           </div>
         </div>
         <!-- Año 5 -->
@@ -1002,7 +1118,7 @@
           areaF = document.getElementById('area-filter'),
           zoomR = document.getElementById('zoom'),
           clk   = document.getElementById('clock'),
-          themeSwitch = document.getElementById('theme-switch'),
+          themeSelector = document.getElementById('theme-selector'), // Cambiado de themeSwitch
           container = document.getElementById('malla-container');
 
     // Referencias a elementos del modal de información de ramo
@@ -1061,19 +1177,19 @@
     setInterval(updateClock,1000);
     updateClock(); // Llama una vez al inicio para mostrar la hora inmediatamente
 
-    // Lógica para el cambio de tema (claro/oscuro)
+    // Lógica para el cambio de tema (múltiples temas)
     // Carga el estado del tema al iniciar la página desde localStorage
-    if (localStorage.getItem('dark') === 'true') {
-        document.body.classList.add('dark');
-        themeSwitch.checked = true;
-    } else {
-        themeSwitch.checked = false;
-    }
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.body.classList.add(savedTheme);
+    themeSelector.value = savedTheme;
 
-    // Escucha el evento de cambio del switch para alternar el tema
-    themeSwitch.addEventListener('change', ()=>{
-      document.body.classList.toggle('dark', themeSwitch.checked);
-      localStorage.setItem('dark', document.body.classList.contains('dark'));
+    // Escucha el evento de cambio del selector para alternar el tema
+    themeSelector.addEventListener('change', (e)=>{
+      // Elimina todas las clases de tema existentes
+      document.body.classList.remove('light', 'dark', 'pastel', 'celeste', 'rosado', 'verde');
+      // Añade la nueva clase de tema
+      document.body.classList.add(e.target.value);
+      localStorage.setItem('theme', e.target.value);
     });
 
     // Lógica para el zoom de la malla
@@ -1323,12 +1439,10 @@
     function reset(){
       showCustomConfirm('¿Estás seguro de que quieres reiniciar todo el progreso? Esto no se puede deshacer.', () => {
         localStorage.removeItem('aprobados'); // Elimina los datos de aprobados
-        // localStorage.removeItem('semesterGrades'); // Ya no es necesario, la calculadora fue eliminada
         aprobados.clear(); // Limpia el conjunto de aprobados
         completedSem.clear(); // Limpia los semestres completados
         completedYear.clear(); // Limpia los años completados
         document.querySelectorAll('.year').forEach(y => y.removeAttribute('data-year-complete')); // Quita el atributo visual de año completo
-        // semesterGrades = {}; // Ya no es necesario
         updateUI(); // Actualiza la interfaz de usuario
         hideCustomConfirm();
       });
@@ -1372,7 +1486,7 @@
     exportBtn.addEventListener('click', () => {
         const dataToExport = {
             aprobados: [...aprobados],
-            // semesterGrades: semesterGrades // Ya no se exportan las notas de semestre
+            theme: localStorage.getItem('theme') || 'light' // Exportar el tema actual
         };
         const dataStr = JSON.stringify(dataToExport); // Convierte el Set a Array y luego a String JSON
         const blob = new Blob([dataStr], { type: 'application/json' });
@@ -1409,11 +1523,13 @@
                     completedYear.clear();
                     document.querySelectorAll('.year').forEach(y => y.removeAttribute('data-year-complete'));
 
-                    // Importar notas de semestres (ya no es necesario, pero se mantiene la estructura por si acaso)
-                    // if (importedData.semesterGrades) {
-                    //     semesterGrades = importedData.semesterGrades;
-                    //     set('semesterGrades', semesterGrades);
-                    // }
+                    // Importar tema si está presente en los datos
+                    if (importedData.theme) {
+                        document.body.classList.remove('light', 'dark', 'pastel', 'celeste', 'rosado', 'verde');
+                        document.body.classList.add(importedData.theme);
+                        themeSelector.value = importedData.theme;
+                        localStorage.setItem('theme', importedData.theme);
+                    }
 
                     updateUI();
                     showCustomAlert('Progreso importado exitosamente.');
@@ -1427,8 +1543,6 @@
         };
         reader.readAsText(file);
     });
-
-    // La lógica de la Calculadora de Promedio Semestral ha sido eliminada.
 
     // Inicialización de la UI al cargar la página
     updateUI();
