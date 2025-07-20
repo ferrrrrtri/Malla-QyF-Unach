@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Malla Química y Farmacia UNACH</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="encabezado">
+    <img src="logo.png" alt="Logo UNACH" class="logo">
+    <div>
+      <h1>Malla Interactiva</h1>
+      <p class="subtitulo">Carrera de Química y Farmacia - Universidad Adventista de Chile</p>
+    </div>
+  </header>
+  <button id="reset">🔄 Reiniciar Progreso</button>
+  <div class="malla">
+    <div class="anio">
+      <h2>1° Año</h2>
+      <div class="semestre">
+        <h3>Semestre 1</h3>
+        <div class="ramo" data-id="cosmovision">Cosmovisión Cristiana y Revelación</div>
+        <div class="ramo" data-id="matematica">Matemática para Farmacia</div>
+        <div class="ramo" data-id="morfo">Morfohistología y Embriología</div>
+        <div class="ramo" data-id="quimica1">Química General I</div>
+        <div class="ramo" data-id="fisica">Física para Farmacia</div>
+        <div class="ramo" data-id="intro">Introducción a las Ciencias Farmacéuticas</div>
+        <div class="ramo" data-id="ingles1">Inglés I</div>
+        <div class="ramo" data-id="taller1">Taller de Habilidades de Aprendizaje I</div>
+      </div>
+      <div class="semestre">
+        <h3>Semestre 2</h3>
+        <div class="ramo" data-id="antropologia">Antropología Bíblica</div>
+        <div class="ramo" data-id="fisicoquimica" data-prer="fisica">Físicoquimica para Farmacia</div>
+        <div class="ramo" data-id="anatomia" data-prer="morfo">Anatomía para Farmacia</div>
+        <div class="ramo" data-id="quimica2" data-prer="quimica1">Química General II</div>
+        <div class="ramo" data-id="comunicacion">Comunicación y Liderazgo</div>
+        <div class="ramo" data-id="genetica" data-prer="morfo">Genética para Farmacia</div>
+        <div class="ramo" data-id="ingles2" data-prer="ingles1">Inglés II</div>
+        <div class="ramo" data-id="taller2">Taller de Habilidades de Aprendizaje II</div>
+      </div>
+    </div>
+    <div class="anio">
+      <h2>2° Año</h2>
+      <div class="semestre">
+        <h3>Semestre 3</h3>
+        <div class="ramo" data-id="cienciayreligion">Ciencia y Religión</div>
+        <div class="ramo" data-id="bioquimica" data-prer="morfo">Bioquímica General para Farmacia</div>
+        <div class="ramo" data-id="fisiologia" data-prer="anatomia">Fisiología para Farmacia</div>
+        <div class="ramo" data-id="analitica" data-prer="quimica2">Química Analítica</div>
+        <div class="ramo" data-id="organica1" data-prer="quimica2">Química Orgánica I</div>
+        <div class="ramo" data-id="ingles3" data-prer="ingles2">Inglés Técnico para Farmacia</div>
+        <div class="ramo" data-id="comple1">Complementario I</div>
+      </div>
+      <div class="semestre">
+        <h3>Semestre 4</h3>
+        <div class="ramo" data-id="ensenanzas">Enseñanzas de la Biblia</div>
+        <div class="ramo" data-id="terapias" data-prer="fisiologia">Terapias Naturales</div>
+        <div class="ramo" data-id="fisiopato" data-prer="fisiologia">Fisiopatología para Farmacia</div>
+        <div class="ramo" data-id="instrumental" data-prer="analitica">Análisis Instrumental y de Medicamentos</div>
+        <div class="ramo" data-id="organica2" data-prer="organica1">Química Orgánica II</div>
+        <div class="ramo" data-id="microbiologia" data-prer="bioquimica">Microbiología y Parasitología</div>
+        <div class="ramo" data-id="comple2" data-prer="comple1">Complementario II</div>
+      </div>
+    </div>
+    <div class="anio">
+      <h2>3° Año</h2>
+      <div class="semestre">
+        <h3>Semestre 5</h3>
+        <div class="ramo" data-id="familia">Familia y Sociedad</div>
+        <div class="ramo" data-id="inmunologia" data-prer="fisiopato">Inmunología y Hematología</div>
+        <div class="ramo" data-id="legislacion" data-prer="intro">Legislación Farmacéutica y Autorización Sanitaria</div>
+        <div class="ramo" data-id="farmacoq1" data-prer="fisicoquimica,organica2">Farmacoquímica I</div>
+        <div class="ramo" data-id="farmacologia1" data-prer="fisiopato">Farmacología I</div>
+        <div class="ramo" data-id="tecno1" data-prer="organica2">Tecnología Farmacéutica I</div>
+        <div class="ramo" data-id="comple3" data-prer="comple2">Complementario III</div>
+      </div>
+      <div class="semestre">
+        <h3>Semestre 6</h3>
+        <div class="ramo" data-id="saludauto">Salud y Autocuidado, Responsabilidad Social y Medioambiente</div>
+        <div class="ramo" data-id="bioqclinica" data-prer="bioquimica">Bioquímica Clínica</div>
+        <div class="ramo" data-id="nutricion">Nutrición y Bromatología Clínicas</div>
+        <div class="ramo" data-id="farmacologia2" data-prer="farmacologia1">Farmacología II</div>
+        <div class="ramo" data-id="farmacoq2" data-prer="farmacoq1">Farmacoquímica II</div>
+        <div class="ramo" data-id="tecno2" data-prer="tecno1">Tecnología Farmacéutica II</div>
+        <div class="ramo" data-id="comple4" data-prer="comple3">Complementario IV</div>
+      </div>
+    </div>
+    <div class="anio">
+      <h2>4° Año</h2>
+      <div class="semestre">
+        <h3>Semestre 7</h3>
+        <div class="ramo" data-id="mision">Misión y Servicio</div>
+        <div class="ramo" data-id="metodologia">Metodología de la Investigación para Farmacia</div>
+        <div class="ramo" data-id="toxico" data-prer="farmacologia2">Toxicología</div>
+        <div class="ramo" data-id="comunitaria" data-prer="farmacologia2">Farmacia Comunitaria y Asistencial</div>
+        <div class="ramo" data-id="farmacognosia">Farmacognosia</div>
+        <div class="ramo" data-id="cosmetica" data-prer="tecno2">Tecnología Cosmética</div>
+        <div class="ramo" data-id="practlab" data-prer="inmunologia,microbiologia">Práctica Laboratorio Clínico</div>
+      </div>
+      <div class="semestre">
+        <h3>Semestre 8</h3>
+        <div class="ramo" data-id="etica">Ética y Vida Profesional</div>
+        <div class="ramo" data-id="bioestadistica">Bioestadística Aplicada</div>
+        <div class="ramo" data-id="vigilancia" data-prer="legislacion">Farmacovigilancia y Tecnovigilancia</div>
+        <div class="ramo" data-id="clinicai" data-prer="comunitaria">Farmacia Clínica I</div>
+        <div class="ramo" data-id="epidemiologia" data-prer="microbiologia">Salud Pública y Epidemiología</div>
+        <div class="ramo" data-id="control" data-prer="cosmetica">Control de Calidad</div>
+        <div class="ramo" data-id="practprivada" data-prer="comunitaria">Práctica Farmacia Privada</div>
+      </div>
+    </div>
+    <div class="anio">
+      <h2>5° Año</h2>
+      <div class="semestre">
+        <h3>Semestre 9</h3>
+        <div class="ramo" data-id="electivo">Electivo de Farmacia</div>
+        <div class="ramo" data-id="tfc1" data-prer="metodologia">TFC I</div>
+        <div class="ramo" data-id="cinetica" data-prer="clinicai">Farmacocinética Aplicada</div>
+        <div class="ramo" data-id="clinica2" data-prer="clinicai">Farmacia Clínica II</div>
+        <div class="ramo" data-id="onco" data-prer="clinicai">Oncoterapia y Cuidados Paliativos</div>
+        <div class="ramo" data-id="aps" data-prer="practprivada">Práctica en Farmacia Comunitaria (APS)</div>
+      </div>
+      <div class="semestre">
+        <h3>Semestre 10</h3>
+        <div class="ramo" data-id="economia">Farmacoeconomía y Compras Públicas</div>
+        <div class="ramo" data-id="tfc2" data-prer="tfc1">TFC II</div>
+        <div class="ramo" data-id="atencion" data-prer="clinica2">Atención Farmacéutica y Seguimiento Farmacológico</div>
+        <div class="ramo" data-id="geriatria" data-prer="clinica2">Farmacogeriatría</div>
+        <div class="ramo" data-id="saludmental">Salud Mental</div>
+        <div class="ramo" data-id="practasis">Práctica Farmacia Asistencial</div>
+      </div>
+    </div>
+    <div class="anio">
+      <h2>6° Año</h2>
+      <div class="semestre">
+        <h3>Semestre 11</h3>
+        <div class="ramo" data-id="internado" data-prer="atencion,cinetica,economia,geriatria,onco,practasis,saludmental,tfc2">Práctica Profesional/Internado</div>
+      </div>
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
