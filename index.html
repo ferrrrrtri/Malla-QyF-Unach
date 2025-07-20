@@ -973,12 +973,6 @@
       <details id="combined-info">
         <summary>Información de la Carrera</summary>
         <div>
-          <h4>Régimen de Estudio</h4>
-          <span>SEMESTRAL</span>
-          <span>DURACIÓN: 11 SEMESTRES</span>
-          <span>JORNADA: DIURNA</span>
-          
-          <h4>Información Adicional</h4>
           <ul>
             <li>Sede: Chillán</li>
             <li>Modalidad: Presencial</li>
@@ -986,6 +980,7 @@
             <li>Arancel 2025: $5.346.000</li>
             <li>Matrícula: $275.000</li>
             <li>Código de postulación: 58202</li>
+            <li>Duración: 11 Semestres</li>
           </ul>
         </div>
       </details>
@@ -1898,7 +1893,10 @@
 
     // Lógica para Exportar Imagen de la Malla
     exportImageBtn.addEventListener('click', async () => {
-        alert('Generando imagen de la malla... esto puede tardar unos segundos.');
+        // Show a loading message
+        const originalButtonText = exportImageBtn.textContent;
+        exportImageBtn.textContent = 'Generando imagen...';
+        exportImageBtn.disabled = true;
 
         const mallaElement = document.getElementById('malla'); // El contenedor principal de la malla
         const totalCreditsText = `Créditos Totales: ${creditosTotalSpan.textContent}/330`;
@@ -1930,26 +1928,32 @@
             context.fillStyle = bgColor;
             context.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
 
-            // Dibujar el logo de la UNACH
             const logoImg = document.querySelector('#header-left img');
-            if (logoImg) {
+            let logoOffset = 0; // Offset for text if logo is drawn
+
+            // Check if logo is loaded before drawing
+            if (logoImg && logoImg.complete && logoImg.naturalWidth > 0) {
                 const logoSize = 60; // Tamaño del logo en el canvas exportado
                 const logoX = padding;
                 const logoY = padding + (headerHeight - logoSize) / 2 - 10; // Centrar verticalmente en el área del encabezado
                 context.drawImage(logoImg, logoX, logoY, logoSize, logoSize);
+                logoOffset = logoSize + 15; // Add offset for text
+            } else {
+                console.warn('Logo image not loaded or found. Skipping drawing logo on exported image.');
+                // Optionally, draw a placeholder or just skip the logo
             }
 
             // Dibujar el título de la malla
             context.font = 'bold 30px "Playfair Display", serif';
             context.fillStyle = bodyStyle.getPropertyValue('--accent');
             context.textAlign = 'left';
-            context.fillText('Malla Interactiva Química y Farmacia', padding + (logoImg ? logoSize + 15 : 0), padding + 30);
+            context.fillText('Malla Interactiva Química y Farmacia', padding + logoOffset, padding + 30);
 
             // Dibujar los créditos totales
             context.font = '22px "Inter", sans-serif';
             context.fillStyle = bodyStyle.getPropertyValue('--text');
             context.textAlign = 'left';
-            context.fillText(totalCreditsText, padding + (logoImg ? logoSize + 15 : 0), padding + 60);
+            context.fillText(totalCreditsText, padding + logoOffset, padding + 60);
 
             // Dibujar la información del tema y la fecha/hora
             context.font = '18px "Inter", sans-serif';
@@ -1974,7 +1978,11 @@
 
         } catch (error) {
             console.error('Error al exportar la imagen:', error);
-            alert('Hubo un error al exportar la imagen. Inténtalo de nuevo. Asegúrate de que el logo.png esté en la misma carpeta.');
+            alert('Hubo un error al exportar la imagen. Inténtalo de nuevo. Asegúrate de que el logo.png esté en la misma carpeta y sea accesible.');
+        } finally {
+            // Restore button state
+            exportImageBtn.textContent = originalButtonText;
+            exportImageBtn.disabled = false;
         }
     });
 
