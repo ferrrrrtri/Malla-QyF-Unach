@@ -256,75 +256,6 @@
       background: #0d47a1;
     }
 
-    /* Estilos para la calculadora de promedio */
-    #grade-calculator-widget {
-        text-align: left;
-    }
-    #grade-calculator-widget h4 {
-        text-align: center;
-    }
-    #semester-selector, .grade-row {
-        margin-bottom: 10px;
-    }
-    #semester-selector label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: 600;
-    }
-    #semester-selector select {
-        width: 100%;
-        padding: 8px;
-        border-radius: 5px;
-        border: 1px solid #ddd;
-        background: var(--bg);
-        color: var(--text);
-    }
-    .grade-row {
-        display: flex;
-        gap: 5px;
-        margin-bottom: 8px;
-        align-items: center;
-    }
-    .grade-row input[type="text"],
-    .grade-row input[type="number"] {
-        flex: 1;
-        padding: 6px;
-        border-radius: 4px;
-        border: 1px solid #ddd;
-        background: var(--bg);
-        color: var(--text);
-    }
-    .grade-row input[type="number"] {
-        max-width: 70px; /* Ancho para la nota */
-    }
-    .grade-row .remove-grade-row {
-        background: var(--red);
-        color: white;
-        border: none;
-        border-radius: 4px;
-        padding: 4px 8px;
-        cursor: pointer;
-        font-size: 0.8em;
-    }
-    #grades-input-area {
-        max-height: 200px; /* Altura máxima para el área de inputs */
-        overflow-y: auto; /* Scroll si hay muchos inputs */
-        padding-right: 5px; /* Para que el scrollbar no tape el contenido */
-    }
-    #grade-calculator-widget button {
-        width: auto;
-        margin-top: 10px;
-        margin-right: 5px;
-        padding: 8px 12px;
-        font-size: 0.9em;
-    }
-    #semester-average {
-        font-weight: 700;
-        color: var(--accent);
-        font-size: 1.1em;
-    }
-
-
     /* MALLA Y ZOOM */
     #malla-container {
       overflow: auto; transform-origin: top center;
@@ -356,6 +287,25 @@
       padding: 10px;
       font-weight: 600;
       font-size: 1.1em;
+      display: flex; /* Usar flexbox para alinear el título y el botón de sello */
+      justify-content: space-between; /* Espacio entre el título y el botón */
+      align-items: center; /* Centrar verticalmente */
+      padding-left: 20px; /* Ajuste de padding para el texto */
+      padding-right: 20px; /* Ajuste de padding para el botón */
+    }
+    .horas-sellos-btn {
+        background: rgba(255,255,255,0.2);
+        color: #fff;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 0.8em;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s ease;
+        white-space: nowrap; /* Evita que el texto se rompa */
+    }
+    .horas-sellos-btn:hover {
+        background: rgba(255,255,255,0.4);
     }
     .semestre {
       padding: 12px;
@@ -695,21 +645,7 @@
           <h4>Biblioteca UNACH</h4>
           <a href="https://biblioteca.unach.cl/basesdatossuscritas/" target="_blank">Ir a la Biblioteca</a>
         </div>
-        <div class="widget-card" id="grade-calculator-widget">
-          <h4>Calculadora de Promedio Semestral</h4>
-          <div id="semester-selector">
-            <label for="select-semester">Seleccionar Semestre:</label>
-            <select id="select-semester">
-              <!-- Opciones de semestre se llenarán con JS -->
-            </select>
-          </div>
-          <div id="grades-input-area">
-            <!-- Aquí se añadirán dinámicamente los campos de nota -->
-          </div>
-          <button id="add-grade-row-btn" class="btn-aprobado">Añadir Asignatura</button>
-          <button id="calculate-average-btn" class="btn-info">Calcular Promedio</button>
-          <p>Promedio Semestral: <span id="semester-average">N/A</span></p>
-        </div>
+        <!-- La calculadora de promedio semestral ha sido eliminada -->
       </div>
     </div>
 
@@ -718,7 +654,10 @@
       <div id="malla">
         <!-- Año 1 -->
         <div class="year" data-year="1">
-          <div class="year-label">1° AÑO</div>
+          <div class="year-label">
+            <span>1° AÑO</span>
+            <div class="horas-sellos-btn">Horas sellos requeridas 25</div>
+          </div>
           <div class="semestre" data-sem="1">
             <div class="progress"><div class="progress-fill"></div></div>
             <div class="ramo" data-code="QYFCCR600" data-area="espiritual" data-creditos="2" data-desc="Estudio de la cosmovisión cristiana y su impacto en la vida y la ciencia.">
@@ -745,9 +684,7 @@
             <div class="ramo" data-code="QYFTAP601" data-area="general" data-creditos="3" data-desc="Taller para el desarrollo de habilidades de estudio y aprendizaje.">
               <span class="dot area-general"></span>Taller de Habilidades de Aprendizaje I
             </div>
-            <div class="ramo" data-code="QYFCSE601" data-area="general" data-creditos="0" data-desc="Crédito Sello I.">
-              <span class="dot area-general"></span>Crédito Sello I
-            </div>
+            <!-- QYFCSE601 - Crédito Sello I (0) ha sido eliminado -->
           </div>
           <div class="semestre" data-sem="2">
             <div class="progress"><div class="progress-fill"></div></div>
@@ -779,7 +716,10 @@
         </div>
         <!-- Año 2 -->
         <div class="year" data-year="2">
-          <div class="year-label">2° AÑO</div>
+          <div class="year-label">
+            <span>2° AÑO</span>
+            <div class="horas-sellos-btn">Horas sellos requeridas 25</div>
+          </div>
           <div class="semestre" data-sem="3">
             <div class="progress"><div class="progress-fill"></div></div>
             <div class="ramo" data-code="QYFCRE600" data-area="espiritual" data-creditos="2" data-desc="Exploración de la relación entre la ciencia y la fe religiosa.">
@@ -827,14 +767,15 @@
             <div class="ramo" data-code="QYFCMP602"  data-req="QYFCMP601" data-area="general" data-creditos="1" data-desc="Asignatura complementaria de libre elección.">
               <span class="dot area-general"></span>Complementario II
             </div>
-            <div class="ramo" data-code="QYFCSE602" data-area="general" data-creditos="0" data-desc="Crédito Sello II.">
-              <span class="dot area-general"></span>Crédito Sello II
-            </div>
+            <!-- QYFCSE602 - Crédito Sello II (0) ha sido eliminado -->
           </div>
         </div>
         <!-- Año 3 -->
         <div class="year" data-year="3">
-          <div class="year-label">3° AÑO</div>
+          <div class="year-label">
+            <span>3° AÑO</span>
+            <div class="horas-sellos-btn">Horas sellos requeridas 25</div>
+          </div>
           <div class="semestre" data-sem="5">
             <div class="progress"><div class="progress-fill"></div></div>
             <div class="ramo" data-code="QYFFYS600" data-area="espiritual" data-creditos="2" data-desc="Análisis de la estructura y dinámica de la familia y la sociedad.">
@@ -882,14 +823,15 @@
             <div class="ramo" data-code="QYFCMP604"  data-req="QYFCMP603" data-area="general" data-creditos="1" data-desc="Asignatura complementaria de libre elección.">
               <span class="dot area-general"></span>Complementario IV
             </div>
-            <div class="ramo" data-code="QYFCSE603" data-area="general" data-creditos="0" data-desc="Crédito Sello III.">
-              <span class="dot area-general"></span>Crédito Sello III
-            </div>
+            <!-- QYFCSE603 - Crédito Sello III (0) ha sido eliminado -->
           </div>
         </div>
         <!-- Año 4 -->
         <div class="year" data-year="4">
-          <div class="year-label">4° AÑO</div>
+          <div class="year-label">
+            <span>4° AÑO</span>
+            <div class="horas-sellos-btn">Horas sellos requeridas 25</div>
+          </div>
           <div class="semestre" data-sem="7">
             <div class="progress"><div class="progress-fill"></div></div>
             <div class="ramo" data-code="QYFMYS600" data-area="espiritual" data-creditos="2" data-desc="Principios de misión y servicio en el contexto cristiano.">
@@ -937,14 +879,15 @@
             <div class="ramo" data-code="QYFPFP600" data-req="QYFFCA600" data-area="practica" data-creditos="4" data-desc="Práctica profesional en farmacias privadas.">
               <span class="dot area-practica"></span>Práctica Farmacia Privada
             </div>
-            <div class="ramo" data-code="QYFCSE604" data-area="general" data-creditos="0" data-desc="Crédito Sello IV.">
-              <span class="dot area-general"></span>Crédito Sello IV
-            </div>
+            <!-- QYFCSE604 - Crédito Sello IV (0) ha sido eliminado -->
           </div>
         </div>
         <!-- Año 5 -->
         <div class="year" data-year="5">
-          <div class="year-label">5° AÑO</div>
+          <div class="year-label">
+            <span>5° AÑO</span>
+            <div class="horas-sellos-btn">Horas sellos requeridas 25</div>
+          </div>
           <div class="semestre" data-sem="9">
             <div class="progress"><div class="progress-fill"></div></div>
             <div class="ramo" data-code="QYFEDF610" data-area="especialidad" data-creditos="2" data-desc="Asignatura electiva para profundizar en un área específica de la farmacia.">
@@ -990,7 +933,10 @@
         </div>
         <!-- Año 6 -->
         <div class="year" data-year="6">
-          <div class="year-label">6° AÑO</div>
+          <div class="year-label">
+            <span>6° AÑO</span>
+            <div class="horas-sellos-btn">Horas sellos requeridas 25</div>
+          </div>
           <div class="semestre" data-sem="11">
             <div class="progress"><div class="progress-fill"></div></div>
             <div class="ramo" data-code="QYFPRO636" data-req="QYFAFS600,QYFFCA610,QYFFCP600,QYFFGE600,QYFOCP600,QYFPFA610,QYFSME600,QYFTFC642" data-area="practica" data-creditos="30" data-desc="Práctica profesional intensiva en un entorno farmacéutico.">
@@ -1096,22 +1042,12 @@
     const importBtn = document.getElementById('import-btn');
     const importFile = document.getElementById('import-file');
 
-    // Referencias para la calculadora de promedio
-    const selectSemester = document.getElementById('select-semester');
-    const gradesInputArea = document.getElementById('grades-input-area');
-    const addGradeRowBtn = document.getElementById('add-grade-row-btn');
-    const calculateAverageBtn = document.getElementById('calculate-average-btn');
-    const semesterAverageSpan = document.getElementById('semester-average');
-
 
     // Variables de estado
     let aprobados = new Set(get('aprobados')), // Conjunto de ramos aprobados
         totalRamos = ramos.length, // Total de ramos en la malla
         completedSem = new Set(), // Semestres completados (para alertas)
         completedYear = new Set(); // Años completados (para alertas)
-
-    // Almacenamiento de notas por semestre
-    let semesterGrades = get('semesterGrades') || {};
 
     // Función para actualizar el reloj en el encabezado
     function updateClock(){
@@ -1387,14 +1323,12 @@
     function reset(){
       showCustomConfirm('¿Estás seguro de que quieres reiniciar todo el progreso? Esto no se puede deshacer.', () => {
         localStorage.removeItem('aprobados'); // Elimina los datos de aprobados
-        localStorage.removeItem('semesterGrades'); // Elimina también las notas de los semestres
+        // localStorage.removeItem('semesterGrades'); // Ya no es necesario, la calculadora fue eliminada
         aprobados.clear(); // Limpia el conjunto de aprobados
         completedSem.clear(); // Limpia los semestres completados
         completedYear.clear(); // Limpia los años completados
         document.querySelectorAll('.year').forEach(y => y.removeAttribute('data-year-complete')); // Quita el atributo visual de año completo
-        semesterGrades = {}; // Reinicia las notas
-        populateSemesterSelector(); // Vuelve a popular el selector de semestre
-        loadGradesForSelectedSemester(); // Carga las notas del semestre seleccionado (que ahora estará vacío)
+        // semesterGrades = {}; // Ya no es necesario
         updateUI(); // Actualiza la interfaz de usuario
         hideCustomConfirm();
       });
@@ -1438,7 +1372,7 @@
     exportBtn.addEventListener('click', () => {
         const dataToExport = {
             aprobados: [...aprobados],
-            semesterGrades: semesterGrades
+            // semesterGrades: semesterGrades // Ya no se exportan las notas de semestre
         };
         const dataStr = JSON.stringify(dataToExport); // Convierte el Set a Array y luego a String JSON
         const blob = new Blob([dataStr], { type: 'application/json' });
@@ -1475,13 +1409,11 @@
                     completedYear.clear();
                     document.querySelectorAll('.year').forEach(y => y.removeAttribute('data-year-complete'));
 
-                    // Importar notas de semestres
-                    if (importedData.semesterGrades) {
-                        semesterGrades = importedData.semesterGrades;
-                        set('semesterGrades', semesterGrades);
-                        populateSemesterSelector(); // Vuelve a popular y selecciona el primero si existe
-                        loadGradesForSelectedSemester();
-                    }
+                    // Importar notas de semestres (ya no es necesario, pero se mantiene la estructura por si acaso)
+                    // if (importedData.semesterGrades) {
+                    //     semesterGrades = importedData.semesterGrades;
+                    //     set('semesterGrades', semesterGrades);
+                    // }
 
                     updateUI();
                     showCustomAlert('Progreso importado exitosamente.');
@@ -1496,118 +1428,10 @@
         reader.readAsText(file);
     });
 
-    // Lógica para la Calculadora de Promedio Semestral
-    function populateSemesterSelector() {
-        selectSemester.innerHTML = ''; // Limpiar opciones existentes
-        const semesters = new Set();
-        document.querySelectorAll('.semestre').forEach(s => {
-            semesters.add(s.dataset.sem);
-        });
-
-        // Ordenar los semestres numéricamente
-        const sortedSemesters = Array.from(semesters).sort((a, b) => parseInt(a) - parseInt(b));
-
-        sortedSemesters.forEach(sem => {
-            const option = document.createElement('option');
-            option.value = sem;
-            option.textContent = `Semestre ${sem}`;
-            selectSemester.appendChild(option);
-        });
-
-        // Seleccionar el primer semestre por defecto o el último guardado
-        if (sortedSemesters.length > 0) {
-            const lastSelectedSemester = localStorage.getItem('lastSelectedSemester');
-            if (lastSelectedSemester && sortedSemesters.includes(lastSelectedSemester)) {
-                selectSemester.value = lastSelectedSemester;
-            } else {
-                selectSemester.value = sortedSemesters[0];
-            }
-            loadGradesForSelectedSemester();
-        } else {
-            gradesInputArea.innerHTML = ''; // Limpiar si no hay semestres
-            semesterAverageSpan.textContent = 'N/A';
-        }
-    }
-
-    function addGradeRow(subjectName = '', grade = '') {
-        const div = document.createElement('div');
-        div.classList.add('grade-row');
-        div.innerHTML = `
-            <input type="text" class="subject-name" placeholder="Nombre Asignatura" value="${subjectName}">
-            <input type="number" class="subject-grade" placeholder="Nota (1-100)" min="1" max="100" value="${grade}">
-            <button class="remove-grade-row btn-desmarcar">X</button>
-        `;
-        gradesInputArea.appendChild(div);
-
-        div.querySelector('.remove-grade-row').addEventListener('click', () => {
-            div.remove();
-            saveGradesForSelectedSemester();
-            calculateSemesterAverage();
-        });
-
-        // Guardar cambios automáticamente al modificar inputs
-        div.querySelector('.subject-name').addEventListener('input', saveGradesForSelectedSemester);
-        div.querySelector('.subject-grade').addEventListener('input', () => {
-            saveGradesForSelectedSemester();
-            calculateSemesterAverage();
-        });
-    }
-
-    function saveGradesForSelectedSemester() {
-        const selectedSem = selectSemester.value;
-        if (!selectedSem) return;
-
-        const grades = [];
-        gradesInputArea.querySelectorAll('.grade-row').forEach(row => {
-            const name = row.querySelector('.subject-name').value.trim();
-            const grade = row.querySelector('.subject-grade').value.trim();
-            if (name && grade) {
-                grades.push({ name, grade: parseFloat(grade) });
-            }
-        });
-        semesterGrades[selectedSem] = grades;
-        set('semesterGrades', semesterGrades);
-        localStorage.setItem('lastSelectedSemester', selectedSem);
-    }
-
-    function loadGradesForSelectedSemester() {
-        gradesInputArea.innerHTML = ''; // Limpiar inputs existentes
-        const selectedSem = selectSemester.value;
-        if (selectedSem && semesterGrades[selectedSem]) {
-            semesterGrades[selectedSem].forEach(gradeEntry => {
-                addGradeRow(gradeEntry.name, gradeEntry.grade);
-            });
-        }
-        calculateSemesterAverage(); // Recalcular el promedio al cargar
-    }
-
-    function calculateSemesterAverage() {
-        const grades = [];
-        gradesInputArea.querySelectorAll('.subject-grade').forEach(input => {
-            const grade = parseFloat(input.value);
-            if (!isNaN(grade) && grade >= 1 && grade <= 100) {
-                grades.push(grade);
-            }
-        });
-
-        if (grades.length === 0) {
-            semesterAverageSpan.textContent = 'N/A';
-            return;
-        }
-
-        const sum = grades.reduce((total, grade) => total + grade, 0);
-        const average = sum / grades.length;
-        semesterAverageSpan.textContent = average.toFixed(2); // Mostrar con 2 decimales
-    }
-
-    // Event Listeners para la calculadora de promedio
-    selectSemester.addEventListener('change', loadGradesForSelectedSemester);
-    addGradeRowBtn.addEventListener('click', () => addGradeRow());
-    calculateAverageBtn.addEventListener('click', calculateSemesterAverage);
+    // La lógica de la Calculadora de Promedio Semestral ha sido eliminada.
 
     // Inicialización de la UI al cargar la página
-    populateSemesterSelector(); // Primero popular el selector de semestres
-    updateUI(); // Luego actualizar el resto de la UI
+    updateUI();
   </script>
 </body>
 </html>
