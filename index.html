@@ -207,15 +207,16 @@
       flex-wrap: wrap; /* Allow items to wrap on smaller screens */
       gap: 10px; /* Space between topbar items */
     }
-    #regimen {
-        /* Remove flex-wrap and gap from here, let summary handle it */
+
+    /* Combined Info Section */
+    #combined-info {
         background: rgba(255,255,255,0.1);
         padding: 5px 10px;
         border-radius: 8px;
         transition: background 0.2s ease;
         white-space: nowrap; /* Keep summary text on one line */
     }
-    #regimen summary {
+    #combined-info summary {
         cursor: pointer;
         font-weight: 600;
         outline: none; /* Quitar el contorno al hacer clic */
@@ -223,25 +224,35 @@
         align-items: center;
         justify-content: space-between; /* Push marker to the right */
     }
-    #regimen summary::-webkit-details-marker {
+    #combined-info summary::-webkit-details-marker {
         display: none; /* Ocultar el marcador predeterminado */
     }
-    #regimen summary:after { /* Custom marker for details summary */
+    #combined-info summary:after { /* Custom marker for details summary */
         content: '\25B6'; /* Right-pointing triangle */
         font-size: 0.8em;
         margin-left: 8px;
         transition: transform 0.2s;
     }
-    #regimen[open] summary:after {
+    #combined-info[open] summary:after {
         content: '\25BC'; /* Down-pointing triangle when open */
     }
-    #regimen > div { /* Target the div directly inside details for content */
+    #combined-info > div { /* Target the div directly inside details for content */
         margin-top: 5px; /* Espacio para el contenido desplegado */
         display: flex;
         flex-direction: column; /* Stack details content vertically */
         gap: 5px; /* Smaller gap for stacked items */
         font-size: 0.85em; /* Slightly smaller font for details content */
     }
+    #combined-info ul {
+      list-style: none; margin: 0; padding-left: 0; font-size: .9em;
+    }
+    #combined-info ul li {
+        margin-bottom: 4px;
+    }
+    #combined-info ul li:last-child {
+        margin-bottom: 0;
+    }
+
 
     #topbar-controls {
       display: flex; align-items: center; gap: 12px;
@@ -600,14 +611,6 @@
     }
     .empty { visibility: hidden; }
     /* INFO Y CALCULADORAS */
-    .info-section summary {
-      cursor: pointer;
-      font-weight: 600;
-      color: var(--accent2);
-    }
-    .info-section ul {
-      list-style: none; margin: 8px 0; padding-left: 0; font-size: .9em;
-    }
     .calc-box {
       background: var(--card);
       padding: 8px 12px;
@@ -853,10 +856,10 @@
             font-size: 0.9em;
             padding: 6px 8px;
         }
-        #regimen summary {
+        #combined-info summary {
             width: 100%; /* Make summary take full width */
         }
-        #regimen > div {
+        #combined-info > div {
             width: 100%;
         }
     }
@@ -943,14 +946,6 @@
 
   <!-- BARRA SECUNDARIA -->
   <div id="topbar">
-    <details id="regimen">
-      <summary>Régimen QyF</summary>
-      <div>
-        <span>SEMESTRAL</span>
-        <span>DURACIÓN: 11 SEMESTRES</span>
-        <span>JORNADA: DIURNA</span>
-      </div>
-    </details>
     <div id="topbar-controls">
       <!-- Botón de información del tr._nico -->
       <button id="tr-nico-info-btn" class="btn-info">?</button>
@@ -971,18 +966,30 @@
       <button id="export-btn">Exportar Progreso</button>
       <input type="file" id="import-file" accept=".json" style="display: none;">
       <button id="import-btn">Importar Progreso</button>
+      <button id="export-image-btn">Exportar Imagen Malla</button> <!-- Nuevo botón -->
       <button onclick="reset()">Reiniciar</button>
-      <details class="info-section">
-        <summary>Información Adicional</summary>
-        <ul>
-          <li>Sede: Chillán</li>
-          <li>Modalidad: Presencial</li>
-          <li>Jornada: Diurna</li>
-          <li>Arancel 2025: $5.346.000</li>
-          <li>Matrícula: $275.000</li>
-          <li>Código de postulación: 58202</li>
-        </ul>
+      
+      <!-- Sección de Información Combinada -->
+      <details id="combined-info">
+        <summary>Información de la Carrera</summary>
+        <div>
+          <h4>Régimen de Estudio</h4>
+          <span>SEMESTRAL</span>
+          <span>DURACIÓN: 11 SEMESTRES</span>
+          <span>JORNADA: DIURNA</span>
+          
+          <h4>Información Adicional</h4>
+          <ul>
+            <li>Sede: Chillán</li>
+            <li>Modalidad: Presencial</li>
+            <li>Jornada: Diurna</li>
+            <li>Arancel 2025: $5.346.000</li>
+            <li>Matrícula: $275.000</li>
+            <li>Código de postulación: 58202</li>
+          </ul>
+        </div>
       </details>
+
       <div class="calc-box">
         <a href="https://calculatodo.com/calcular-promedio-ponderado-notas" target="_blank">
           Calcular mi nota para aprobar
@@ -1401,6 +1408,9 @@
     </div>
   </div>
 
+  <!-- Script para html2canvas -->
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
   <script>
     // Referencias a los elementos del DOM
     const ramos = document.querySelectorAll('.ramo'),
@@ -1449,6 +1459,7 @@
     const exportBtn = document.getElementById('export-btn');
     const importBtn = document.getElementById('import-btn');
     const importFile = document.getElementById('import-file');
+    const exportImageBtn = document.getElementById('export-image-btn'); // Nuevo botón de exportar imagen
 
     // Nuevas referencias para el modal de semestre completado
     const semesterCompleteModal = document.getElementById('semester-complete-modal');
@@ -1542,9 +1553,6 @@
           const code = r.dataset.code, // Código del ramo
                 deps = r.dataset.req ? r.dataset.req.split(',') : []; // Prerequisitos del ramo
           r.classList.remove('aprobado','desbloqueado','highlight'); // Limpia classes de animación
-
-          // Check if it was previously approved to re-apply animation
-          const wasApproved = aprobados.has(code);
 
           if(aprobados.has(code)){
             r.classList.add('aprobado'); // Marca como aprobado
@@ -1886,6 +1894,88 @@
             }
         };
         reader.readAsText(file);
+    });
+
+    // Lógica para Exportar Imagen de la Malla
+    exportImageBtn.addEventListener('click', async () => {
+        alert('Generando imagen de la malla... esto puede tardar unos segundos.');
+
+        const mallaElement = document.getElementById('malla'); // El contenedor principal de la malla
+        const totalCreditsText = `Créditos Totales: ${creditosTotalSpan.textContent}/330`;
+        const themeName = themeSelector.value; // Obtener el nombre del tema actual
+        const currentThemeDisplay = themeSelector.options[themeSelector.selectedIndex].text; // Obtener el texto visible del tema
+        const currentDateTime = clk.textContent; // Obtener la fecha y hora actual
+
+        try {
+            // Capturar el contenido de la malla
+            const canvas = await html2canvas(mallaElement, {
+                scale: 2, // Aumentar la escala para una mejor resolución de la imagen
+                useCORS: true, // Intentar manejar imágenes de origen cruzado (como logo.png si fuera externo)
+                backgroundColor: null // Permitir que el fondo sea transparente o herede del body
+            });
+
+            // Crear un nuevo canvas para combinar la malla y el texto
+            const finalCanvas = document.createElement('canvas');
+            const context = finalCanvas.getContext('2d');
+
+            // Calcular dimensiones para el canvas final
+            const padding = 30; // Relleno alrededor de la imagen
+            const headerHeight = 80; // Altura para el encabezado de la imagen (título, créditos, tema, fecha)
+            finalCanvas.width = canvas.width + padding * 2;
+            finalCanvas.height = canvas.height + headerHeight + padding * 2;
+
+            // Obtener el color de fondo del body para el canvas final
+            const bodyStyle = getComputedStyle(document.body);
+            const bgColor = bodyStyle.getPropertyValue('--bg');
+            context.fillStyle = bgColor;
+            context.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+
+            // Dibujar el logo de la UNACH
+            const logoImg = document.querySelector('#header-left img');
+            if (logoImg) {
+                const logoSize = 60; // Tamaño del logo en el canvas exportado
+                const logoX = padding;
+                const logoY = padding + (headerHeight - logoSize) / 2 - 10; // Centrar verticalmente en el área del encabezado
+                context.drawImage(logoImg, logoX, logoY, logoSize, logoSize);
+            }
+
+            // Dibujar el título de la malla
+            context.font = 'bold 30px "Playfair Display", serif';
+            context.fillStyle = bodyStyle.getPropertyValue('--accent');
+            context.textAlign = 'left';
+            context.fillText('Malla Interactiva Química y Farmacia', padding + (logoImg ? logoSize + 15 : 0), padding + 30);
+
+            // Dibujar los créditos totales
+            context.font = '22px "Inter", sans-serif';
+            context.fillStyle = bodyStyle.getPropertyValue('--text');
+            context.textAlign = 'left';
+            context.fillText(totalCreditsText, padding + (logoImg ? logoSize + 15 : 0), padding + 60);
+
+            // Dibujar la información del tema y la fecha/hora
+            context.font = '18px "Inter", sans-serif';
+            context.fillStyle = bodyStyle.getPropertyValue('--text');
+            context.textAlign = 'right';
+            context.fillText(`Tema: ${currentThemeDisplay}`, finalCanvas.width - padding, padding + 30);
+            context.fillText(`Fecha: ${currentDateTime}`, finalCanvas.width - padding, padding + 60);
+
+            // Dibujar la malla capturada
+            context.drawImage(canvas, padding, headerHeight + padding);
+
+            // Crear un enlace de descarga
+            const image = finalCanvas.toDataURL('image/png');
+            const a = document.createElement('a');
+            a.href = image;
+            a.download = `malla_unach_qyf_progreso_${themeName}_${new Date().toISOString().slice(0,10)}.png`; // Nombre de archivo dinámico
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            alert('Imagen de la malla exportada exitosamente!');
+
+        } catch (error) {
+            console.error('Error al exportar la imagen:', error);
+            alert('Hubo un error al exportar la imagen. Inténtalo de nuevo. Asegúrate de que el logo.png esté en la misma carpeta.');
+        }
     });
 
     // Calendar logic
