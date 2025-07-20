@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Malla Interactiva QyF UNACH</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@700&display=swap');
@@ -22,6 +23,8 @@
       --ramo-aprobado-bg: #e1f5fe; /* Very Light Blue */
       --ramo-desbloqueado-bg: #fff8e1; /* Very Light Yellow */
       --creditos-bg: rgba(255, 255, 255, 0.8); /* Slightly transparent white for credits */
+      --success-modal-bg: #e8f5e9; /* Light green for success modal */
+      --success-modal-text: #1b5e20; /* Dark green for success modal text */
     }
 
     /* Dark Theme */
@@ -40,6 +43,8 @@
       --ramo-aprobado-bg: #30475e;
       --ramo-desbloqueado-bg: #5f4b00;
       --creditos-bg: rgba(44, 44, 44, 0.8); /* Slightly transparent dark for credits */
+      --success-modal-bg: #388e3c; /* Darker green for success modal */
+      --success-modal-text: #e8f5e9; /* Light text for success modal */
     }
 
     /* Pastel Theme */
@@ -58,6 +63,8 @@
       --ramo-aprobado-bg: #e0f0e0;
       --ramo-desbloqueado-bg: #f5f5e0;
       --creditos-bg: rgba(254, 254, 254, 0.8);
+      --success-modal-bg: #a7d8b0;
+      --success-modal-text: #5d3f6a;
     }
 
     /* Celeste Theme */
@@ -76,6 +83,8 @@
       --ramo-aprobado-bg: #b2ebf2;
       --ramo-desbloqueado-bg: #ffe0b2;
       --creditos-bg: rgba(255, 255, 255, 0.8);
+      --success-modal-bg: #4db6ac;
+      --success-modal-text: #004d40;
     }
 
     /* Rosado Theme */
@@ -94,6 +103,8 @@
       --ramo-aprobado-bg: #f8bbd0;
       --ramo-desbloqueado-bg: #fff9c4;
       --creditos-bg: rgba(255, 255, 255, 0.8);
+      --success-modal-bg: #e91e63;
+      --success-modal-text: #ffffff;
     }
 
     /* Verde Theme */
@@ -112,6 +123,8 @@
       --ramo-aprobado-bg: #c8e6c9;
       --ramo-desbloqueado-bg: #fffde7;
       --creditos-bg: rgba(255, 255, 255, 0.8);
+      --success-modal-bg: #4caf50;
+      --success-modal-text: #ffffff;
     }
 
     * { box-sizing: border-box; }
@@ -119,6 +132,7 @@
       margin: 0; font-family: 'Inter', sans-serif;
       background: var(--bg); color: var(--text);
       transition: background .3s, color .3s;
+      overflow-x: hidden; /* Prevent horizontal scrolling on small screens */
     }
     /* HEADER PRINCIPAL */
     #main-header {
@@ -128,6 +142,8 @@
       color: #fff; font-family: 'Playfair Display', serif;
       position: sticky; top: 0; z-index: 1000;
       box-shadow: 0 2px 4px var(--shadow);
+      flex-wrap: wrap; /* Allow items to wrap on smaller screens */
+      gap: 10px; /* Space between header items */
     }
     #header-left { display: flex; align-items: center; }
     #header-left img { height: 40px; margin-right: 12px; }
@@ -142,6 +158,7 @@
         font-weight: 700;
         text-align: center;
         position: relative; /* Para posicionar el texto adicional */
+        flex-grow: 1; /* Allow title to take available space */
     }
     #unach-qf-link {
         color: inherit; /* Hereda el color del padre (blanco en header) */
@@ -162,10 +179,12 @@
     #header-right {
       display: flex; align-items: center; gap: 12px;
       font-size: .9em;
+      flex-wrap: wrap; /* Allow items to wrap */
+      justify-content: flex-end; /* Align to the right */
     }
     #clock {
       padding: 4px 8px; background: rgba(255,255,255,0.2);
-      border-radius: 4px; font-family: monospace; min-width: 60px;
+      border-radius: 4px; font-family: monospace; min-width: 120px; /* Increased width for date */
       text-align: center;
     }
     /* Theme Selector */
@@ -185,41 +204,50 @@
       color: #fff; position: sticky; top: 72px; z-index: 900;
       box-shadow: 0 2px 4px var(--shadow);
       font-size: .9em;
+      flex-wrap: wrap; /* Allow items to wrap on smaller screens */
+      gap: 10px; /* Space between topbar items */
     }
     #regimen {
-        display: flex;
-        gap: 16px;
-        flex-wrap: wrap;
-        /* Estilos para el details/summary */
+        /* Remove flex-wrap and gap from here, let summary handle it */
         background: rgba(255,255,255,0.1);
         padding: 5px 10px;
         border-radius: 8px;
         transition: background 0.2s ease;
+        white-space: nowrap; /* Keep summary text on one line */
     }
     #regimen summary {
         cursor: pointer;
         font-weight: 600;
         outline: none; /* Quitar el contorno al hacer clic */
+        display: flex; /* Use flex to align text and custom marker */
+        align-items: center;
+        justify-content: space-between; /* Push marker to the right */
     }
     #regimen summary::-webkit-details-marker {
         display: none; /* Ocultar el marcador predeterminado */
     }
-    #regimen summary:before {
-        content: '+ '; /* Añadir un marcador personalizado */
-        margin-right: 5px;
+    #regimen summary:after { /* Custom marker for details summary */
+        content: '\25B6'; /* Right-pointing triangle */
+        font-size: 0.8em;
+        margin-left: 8px;
+        transition: transform 0.2s;
     }
-    #regimen[open] summary:before {
-        content: '- '; /* Cambiar el marcador cuando está abierto */
+    #regimen[open] summary:after {
+        content: '\25BC'; /* Down-pointing triangle when open */
     }
-    #regimen div {
+    #regimen > div { /* Target the div directly inside details for content */
         margin-top: 5px; /* Espacio para el contenido desplegado */
         display: flex;
-        gap: 16px;
-        flex-wrap: wrap;
+        flex-direction: column; /* Stack details content vertically */
+        gap: 5px; /* Smaller gap for stacked items */
+        font-size: 0.85em; /* Slightly smaller font for details content */
     }
 
     #topbar-controls {
       display: flex; align-items: center; gap: 12px;
+      flex-wrap: wrap; /* Allow controls to wrap */
+      justify-content: flex-end; /* Align to the right */
+      flex-grow: 1; /* Allow controls to take available space */
     }
     #topbar-controls input[type="text"],
     #topbar-controls select {
@@ -236,7 +264,7 @@
     #topbar-controls button:hover { background: #2e7dff; }
     #contador { font-weight: 600; margin-left: 8px; }
 
-    /* Nuevo estilo para la sección de créditos en el topbar */
+    /* Nuevo estilo para la sección de créditos en el topbar (solo total) */
     #creditos-info {
         margin-left: 15px;
         font-size: 0.9em;
@@ -249,9 +277,8 @@
         box-shadow: 0 1px 3px var(--shadow); /* Sombra ligera */
         color: var(--text); /* Asegura que el texto sea visible */
     }
-    #creditos-info .dot {
-        width: 8px;
-        height: 8px;
+    #creditos-info .dot { /* Hide dots from topbar credits */
+        display: none;
     }
     #creditos-info span {
         font-weight: 600;
@@ -286,6 +313,7 @@
     #content-wrapper {
       display: flex; gap: 20px; padding: 20px;
       align-items: flex-start; /* Alinea los elementos al inicio */
+      flex-wrap: wrap; /* Allow content to wrap on smaller screens */
     }
     /* LEYENDA ÁREAS */
     #legend {
@@ -296,7 +324,9 @@
     }
     #legend table { width: 100%; border-collapse: collapse; font-size: .9em; }
     #legend th { padding-bottom: 8px; text-align: left; }
-    #legend td { padding: 4px 0; }
+    #legend td { padding: 4px 0; display: flex; align-items: center; justify-content: space-between; } /* Added flex for alignment */
+    #legend td span:last-child { margin-left: auto; font-weight: 600; } /* Align credit count to right */
+
     .dot {
       display: inline-block; width: 10px; height: 10px;
       border-radius: 50%; margin-right: 6px; vertical-align: middle;
@@ -315,6 +345,7 @@
       min-width: 200px; /* Ancho mínimo para la barra lateral */
       max-width: 250px; /* Ancho máximo */
       flex-shrink: 0; /* Evita que la barra lateral se encoja */
+      width: 100%; /* Default to full width on small screens */
     }
 
     #widgets-panel {
@@ -365,6 +396,74 @@
       background: #0d47a1;
     }
 
+    /* Calendar Widget Specific Styles */
+    #calendar-widget {
+        text-align: left;
+    }
+    #calendar-widget h4 {
+        text-align: center;
+    }
+    #calendar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    #calendar-header button {
+        background: var(--accent);
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1em;
+    }
+    #calendar-header button:hover {
+        background: #0d47a1;
+    }
+    #calendar-header h5 {
+        margin: 0;
+        font-size: 1.1em;
+        color: var(--accent);
+    }
+    #calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 2px;
+        font-size: 0.85em;
+    }
+    .day-name {
+        background: var(--accent2);
+        color: white;
+        padding: 5px 0;
+        text-align: center;
+        font-weight: 600;
+    }
+    .calendar-day {
+        background: var(--ramo-bg);
+        padding: 5px;
+        text-align: center;
+        min-height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 3px;
+    }
+    .calendar-day.empty {
+        background: #eee; /* Lighter background for empty days */
+        color: #ccc;
+    }
+    body.dark .calendar-day.empty {
+        background: #444;
+        color: #777;
+    }
+    .calendar-day.current-day {
+        background: var(--green);
+        color: white;
+        font-weight: 700;
+    }
+
+
     /* MALLA Y ZOOM */
     #malla-container {
       overflow: auto; transform-origin: top center;
@@ -390,7 +489,7 @@
     }
     .year-label {
       grid-column: 1 / -1;
-      background: var(--accent2);
+      background: linear-gradient(90deg,var(--accent2),var(--accent)); /* Gradient background */
       color: #fff;
       text-align: center;
       padding: 10px;
@@ -458,14 +557,29 @@
       transform: translateY(-2px);
       box-shadow: 0 4px 12px var(--shadow);
     }
+
+    /* ANIMACIONES DE RAMOS */
     .aprobado {
       background: var(--ramo-aprobado-bg) !important;
       border-left-color: var(--green) !important;
+      animation: sparkle-green 0.6s ease-out forwards; /* Animación al aprobar */
     }
+    @keyframes sparkle-green {
+        0% { transform: scale(1); box-shadow: 0 0 0 var(--green); opacity: 1; }
+        50% { transform: scale(1.03); box-shadow: 0 0 15px var(--green), 0 0 30px var(--green); opacity: 0.8; }
+        100% { transform: scale(1); box-shadow: 0 0 0 var(--green); opacity: 1; }
+    }
+
     .desbloqueado {
       background: var(--ramo-desbloqueado-bg) !important;
       border-left-color: var(--yellow) !important;
+      animation: pulse-yellow 1.5s infinite alternate ease-in-out; /* Animación parpadeante */
     }
+    @keyframes pulse-yellow {
+        0% { box-shadow: 0 0 0 rgba(250, 204, 21, 0.4); }
+        100% { box-shadow: 0 0 15px rgba(250, 204, 21, 0.8); }
+    }
+
     .error {
       animation: shake .3s;
       background: var(--red) !important;
@@ -507,7 +621,7 @@
       font-weight: 600;
     }
 
-    /* Estilos para el Modal de Información de Ramo */
+    /* Estilos para los Modales */
     .modal-backdrop {
       position: fixed;
       top: 0;
@@ -639,6 +753,158 @@
     .custom-alert-modal .modal-buttons {
         justify-content: center;
     }
+
+    /* Nuevo Modal de Felicidades por Semestre */
+    #semester-complete-modal .modal-content {
+        background-color: var(--success-modal-bg);
+        color: var(--success-modal-text);
+        border: 3px solid var(--green);
+        animation: bounceIn 0.6s ease-out;
+        text-align: center;
+        max-width: 550px;
+    }
+    #semester-complete-modal .modal-title {
+        color: var(--success-modal-text);
+        font-size: 2em;
+        margin-bottom: 10px;
+    }
+    #semester-complete-modal p {
+        font-size: 1.2em;
+        margin-bottom: 20px;
+    }
+    #semester-complete-modal .modal-buttons {
+        justify-content: center;
+    }
+    #semester-complete-modal .modal-buttons .btn-close {
+        background-color: var(--green);
+        color: white;
+    }
+    #semester-complete-modal .modal-buttons .btn-close:hover {
+        background-color: #0b9e6f;
+    }
+
+    @keyframes bounceIn {
+        0% { transform: scale(0.3); opacity: 0; }
+        50% { transform: scale(1.05); opacity: 1; }
+        70% { transform: scale(0.9); }
+        100% { transform: scale(1); }
+    }
+
+    /* --- Responsive Design --- */
+    @media (max-width: 1024px) {
+        #main-header, #topbar {
+            padding: 10px;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        #header-right, #topbar-controls {
+            width: 100%;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        #header-title {
+            font-size: 1.3em;
+        }
+        #university-name {
+            font-size: 0.7em;
+        }
+        #clock {
+            min-width: unset;
+            width: auto;
+        }
+        #creditos-info {
+            margin-left: 0;
+            width: 100%;
+            justify-content: center;
+        }
+        #content-wrapper {
+            flex-direction: column;
+            padding: 15px;
+            gap: 15px;
+        }
+        #left-sidebar {
+            max-width: 100%;
+            min-width: unset;
+        }
+        #malla-container {
+            width: 100%;
+            overflow-x: auto; /* Allow horizontal scroll for the malla if it's too wide */
+        }
+        #malla {
+            width: fit-content; /* Allow malla to take its natural width */
+            margin: 0 auto;
+        }
+        .year {
+            grid-template-columns: 1fr; /* Stack semestres vertically */
+            gap: 15px;
+        }
+        .year-label {
+            padding: 10px 15px;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .horas-sellos-btn {
+            font-size: 0.75em;
+            padding: 4px 8px;
+        }
+        .ramo {
+            font-size: 0.9em;
+            padding: 6px 8px;
+        }
+        #regimen summary {
+            width: 100%; /* Make summary take full width */
+        }
+        #regimen > div {
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 600px) {
+        #main-header {
+            padding: 8px 10px;
+        }
+        #header-left img {
+            height: 30px;
+        }
+        #header-title {
+            font-size: 1.1em;
+        }
+        #university-name {
+            font-size: 0.6em;
+        }
+        #topbar {
+            padding: 8px 10px;
+            font-size: 0.8em;
+        }
+        #topbar-controls button,
+        #topbar-controls input,
+        #topbar-controls select {
+            font-size: 0.8em;
+            padding: 5px 8px;
+        }
+        #creditos-info {
+            font-size: 0.8em;
+            padding: 6px 10px;
+        }
+        #legend {
+            font-size: 0.8em;
+            padding: 10px;
+        }
+        .widget-card h4 {
+            font-size: 0.9em;
+        }
+        .widget-card a {
+            padding: 6px 10px;
+            font-size: 0.85em;
+        }
+        /* Further adjust malla layout if needed for very small screens */
+        .ramo {
+            font-size: 0.85em;
+        }
+    }
+
   </style>
 </head>
 <body>
@@ -678,7 +944,7 @@
   <!-- BARRA SECUNDARIA -->
   <div id="topbar">
     <details id="regimen">
-      <summary>RÉGIMEN ESTUDIO</summary>
+      <summary>Régimen QyF</summary>
       <div>
         <span>SEMESTRAL</span>
         <span>DURACIÓN: 11 SEMESTRES</span>
@@ -690,12 +956,7 @@
       <button id="tr-nico-info-btn" class="btn-info">?</button>
       <span>Progreso: <span id="contador">0%</span></span>
       <div id="creditos-info">
-        Créditos: <span id="creditos-total">0</span>
-        <span class="dot area-espiritual"></span><span id="creditos-espiritual">0</span>
-        <span class="dot area-general"></span><span id="creditos-general">0</span>
-        <span class="dot area-profesional"></span><span id="creditos-profesional">0</span>
-        <span class="dot area-especialidad"></span><span id="creditos-especialidad">0</span>
-        <span class="dot area-practica"></span><span id="creditos-practica">0</span>
+        Créditos Totales: <span id="creditos-total">0</span>/330
       </div>
       <input id="buscador" type="text" placeholder="Buscar asignatura…"/>
       <select id="area-filter">
@@ -743,11 +1004,11 @@
       <div id="legend">
         <table>
           <tr><th>ÁREAS DE FORMACIÓN</th></tr>
-          <tr><td><span class="dot area-espiritual"></span>Espiritual</td></tr>
-          <tr><td><span class="dot area-general"></span>General</td></tr>
-          <tr><td><span class="dot area-profesional"></span>Profesional</td></tr>
-          <tr><td><span class="dot area-especialidad"></span>Especialidad</td></tr>
-          <tr><td><span class="dot area-practica"></span>Práctica</td></tr>
+          <tr><td><span class="dot area-espiritual"></span>Espiritual<span id="creditos-espiritual">0</span></td></tr>
+          <tr><td><span class="dot area-general"></span>General<span id="creditos-general">0</span></td></tr>
+          <tr><td><span class="dot area-profesional"></span>Profesional<span id="creditos-profesional">0</span></td></tr>
+          <tr><td><span class="dot area-especialidad"></span>Especialidad<span id="creditos-especialidad">0</span></td></tr>
+          <tr><td><span class="dot area-practica"></span>Práctica<span id="creditos-practica">0</span></td></tr>
         </table>
       </div>
 
@@ -766,6 +1027,26 @@
           <h4>Google Académico</h4>
           <a href="https://scholar.google.es/?hl=es" target="_blank">Buscar Artículos</a>
         </div>
+        <details class="widget-card" id="calendar-widget">
+          <summary><h4>Calendario</h4></summary>
+          <div id="calendar-content">
+            <div id="calendar-header">
+              <button id="prev-month">&lt;</button>
+              <h5 id="current-month-year"></h5>
+              <button id="next-month">&gt;</button>
+            </div>
+            <div id="calendar-grid">
+              <div class="day-name">Lun</div>
+              <div class="day-name">Mar</div>
+              <div class="day-name">Mié</div>
+              <div class="day-name">Jue</div>
+              <div class="day-name">Vie</div>
+              <div class="day-name">Sáb</div>
+              <div class="day-name">Dom</div>
+              <!-- Days will be generated here by JS -->
+            </div>
+          </div>
+        </details>
       </div>
     </div>
 
@@ -1109,6 +1390,17 @@
     </div>
   </div>
 
+  <!-- Nuevo Modal de Felicidades por Semestre Completado -->
+  <div id="semester-complete-modal" class="modal-backdrop">
+    <div class="modal-content">
+      <h3 class="modal-title">¡FELICIDADES!</h3>
+      <p id="semester-complete-message"></p>
+      <div class="modal-buttons">
+        <button class="btn-close" id="semester-complete-modal-close-btn">¡Entendido!</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     // Referencias a los elementos del DOM
     const ramos = document.querySelectorAll('.ramo'),
@@ -1118,7 +1410,7 @@
           areaF = document.getElementById('area-filter'),
           zoomR = document.getElementById('zoom'),
           clk   = document.getElementById('clock'),
-          themeSelector = document.getElementById('theme-selector'), // Cambiado de themeSwitch
+          themeSelector = document.getElementById('theme-selector'),
           container = document.getElementById('malla-container');
 
     // Referencias a elementos del modal de información de ramo
@@ -1139,7 +1431,7 @@
     const confirmResetYes = document.getElementById('confirm-reset-yes');
     const confirmResetNo = document.getElementById('confirm-reset-no');
 
-    // Referencias a elementos de créditos
+    // Referencias a elementos de créditos (ahora en la leyenda)
     const creditosTotalSpan = document.getElementById('creditos-total');
     const creditosEspiritualSpan = document.getElementById('creditos-espiritual');
     const creditosGeneralSpan = document.getElementById('creditos-general');
@@ -1158,20 +1450,32 @@
     const importBtn = document.getElementById('import-btn');
     const importFile = document.getElementById('import-file');
 
+    // Nuevas referencias para el modal de semestre completado
+    const semesterCompleteModal = document.getElementById('semester-complete-modal');
+    const semesterCompleteMessage = document.getElementById('semester-complete-message');
+    const semesterCompleteModalCloseBtn = document.getElementById('semester-complete-modal-close-btn');
+
+    // Calendar elements
+    const calendarWidget = document.getElementById('calendar-widget');
+    const calendarHeader = document.getElementById('calendar-header');
+    const currentMonthYear = document.getElementById('current-month-year');
+    const prevMonthBtn = document.getElementById('prev-month');
+    const nextMonthBtn = document.getElementById('next-month');
+    const calendarGrid = document.getElementById('calendar-grid');
 
     // Variables de estado
     let aprobados = new Set(get('aprobados')), // Conjunto de ramos aprobados
         totalRamos = ramos.length, // Total de ramos en la malla
-        completedSem = new Set(), // Semestres completados (para alertas)
-        completedYear = new Set(); // Años completados (para alertas)
+        completedSem = new Set(get('completedSem')), // Semestres completados (para alertas), cargado de localStorage
+        completedYear = new Set(get('completedYear')); // Años completados (para alertas), cargado de localStorage
+
+    let currentCalendarDate = new Date(); // Current date for the calendar
 
     // Función para actualizar el reloj en el encabezado
     function updateClock(){
-      const now = new Date(),
-            h = String(now.getHours()).padStart(2,'0'),
-            m = String(now.getMinutes()).padStart(2,'0'),
-            s = String(now.getSeconds()).padStart(2,'0');
-      clk.textContent = `${h}:${m}:${s}`;
+      const now = new Date();
+      const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+      clk.textContent = now.toLocaleDateString('es-ES', options);
     }
     // Actualiza el reloj cada segundo
     setInterval(updateClock,1000);
@@ -1237,7 +1541,10 @@
         hijos.forEach(r=>{
           const code = r.dataset.code, // Código del ramo
                 deps = r.dataset.req ? r.dataset.req.split(',') : []; // Prerequisitos del ramo
-          r.classList.remove('aprobado','desbloqueado','highlight'); // Limpia clases anteriores
+          r.classList.remove('aprobado','desbloqueado','highlight'); // Limpia classes de animación
+
+          // Check if it was previously approved to re-apply animation
+          const wasApproved = aprobados.has(code);
 
           if(aprobados.has(code)){
             r.classList.add('aprobado'); // Marca como aprobado
@@ -1253,7 +1560,15 @@
                 }
             }
           } else if(deps.length > 0 && deps.every(q => aprobados.has(q))){
+            // Check if it was previously unlocked to avoid re-triggering animation on every UI update
+            const wasUnlocked = r.classList.contains('desbloqueado');
             r.classList.add('desbloqueado'); // Marca como desbloqueado si los prerequisitos están aprobados
+            if (!wasUnlocked) {
+                // Re-apply animation if it just became unlocked
+                r.style.animation = 'none';
+                void r.offsetWidth; // Trigger reflow
+                r.style.animation = null;
+            }
           }
         });
 
@@ -1267,8 +1582,9 @@
         const sem = s.dataset.sem;
         // Muestra una alerta si el semestre está completo y no se ha alertado antes
         if(aproS === hijos.length && hijos.length > 0 && !completedSem.has(sem)){
-          showCustomAlert(`¡Felicidades, sobreviviste al ${sem}° semestre!`);
+          showSemesterCompleteModal(`¡Felicidades, sobreviviste al ${sem}° semestre!`);
           completedSem.add(sem);
+          set('completedSem', [...completedSem]); // Guarda el estado actualizado
         }
       });
 
@@ -1296,14 +1612,16 @@
           // Si el año está completo y no se ha alertado antes
           if(allSemestersComplete && !completedYear.has(year)){
             y.setAttribute('data-year-complete',''); // Añade un atributo para el estilo visual
-            showCustomAlert(`¡Felicidades, completaste el ${year}° año!`);
+            showSemesterCompleteModal(`¡Felicidades, completaste el ${year}° año!`);
             completedYear.add(year);
+            set('completedYear', [...completedYear]); // Guarda el estado actualizado
           }
         }
       });
     }
 
     // Función para mostrar un modal de alerta personalizado (se mantiene el alert() por ahora)
+    // NOTA: Esta función ya no se usa para completar semestre/año, ahora se usa showSemesterCompleteModal
     function showCustomAlert(message) {
         alert(message);
     }
@@ -1372,7 +1690,7 @@
                 const falt = deps.find(q => !aprobados.has(q));
                 const nom = document.querySelector(`.ramo[data-code="${falt}"]`).textContent;
                 currentRamoElement.classList.add('error');
-                showCustomAlert(`Lo siento, aún no has aprobado "${nom.trim()}" para aprobar este ramo.`);
+                alert(`Lo siento, aún no has aprobado "${nom.trim()}" para aprobar este ramo.`);
                 currentRamoElement.addEventListener('animationend', () => currentRamoElement.classList.remove('error'), { once: true });
             } else {
                 aprobados.add(code);
@@ -1439,6 +1757,8 @@
     function reset(){
       showCustomConfirm('¿Estás seguro de que quieres reiniciar todo el progreso? Esto no se puede deshacer.', () => {
         localStorage.removeItem('aprobados'); // Elimina los datos de aprobados
+        localStorage.removeItem('completedSem'); // Elimina semestres completados
+        localStorage.removeItem('completedYear'); // Elimina años completados
         aprobados.clear(); // Limpia el conjunto de aprobados
         completedSem.clear(); // Limpia los semestres completados
         completedYear.clear(); // Limpia los años completados
@@ -1482,11 +1802,31 @@
         }
     });
 
+    // Funciones para el modal de semestre completado
+    function showSemesterCompleteModal(message) {
+        semesterCompleteMessage.textContent = message;
+        semesterCompleteModal.classList.add('show');
+    }
+
+    function hideSemesterCompleteModal() {
+        semesterCompleteModal.classList.remove('show');
+    }
+
+    semesterCompleteModalCloseBtn.addEventListener('click', hideSemesterCompleteModal);
+    semesterCompleteModal.addEventListener('click', (e) => {
+        if (e.target === semesterCompleteModal) {
+            hideSemesterCompleteModal();
+        }
+    });
+
+
     // Funciones de Exportar/Importar Progreso
     exportBtn.addEventListener('click', () => {
         const dataToExport = {
             aprobados: [...aprobados],
-            theme: localStorage.getItem('theme') || 'light' // Exportar el tema actual
+            theme: localStorage.getItem('theme') || 'light', // Exportar el tema actual
+            completedSem: [...completedSem], // Exportar semestres completados
+            completedYear: [...completedYear] // Exportar años completados
         };
         const dataStr = JSON.stringify(dataToExport); // Convierte el Set a Array y luego a String JSON
         const blob = new Blob([dataStr], { type: 'application/json' });
@@ -1498,7 +1838,7 @@
         a.click();
         document.body.removeChild(a); // Limpiar
         URL.revokeObjectURL(url); // Liberar el objeto URL
-        showCustomAlert('Progreso exportado exitosamente como "progreso_malla_unach.json"');
+        alert('Progreso exportado exitosamente como "progreso_malla_unach.json"'); // Usar alert para este mensaje
     });
 
     importBtn.addEventListener('click', () => {
@@ -1518,9 +1858,13 @@
                 if (importedData && importedData.aprobados && Array.isArray(importedData.aprobados)) {
                     aprobados = new Set(importedData.aprobados);
                     set('aprobados', [...aprobados]);
-                    // Reiniciar estados de semestres/años completados para que se recalcule
-                    completedSem.clear();
-                    completedYear.clear();
+                    
+                    // Importar semestres y años completados
+                    completedSem = new Set(importedData.completedSem || []);
+                    set('completedSem', [...completedSem]);
+                    completedYear = new Set(importedData.completedYear || []);
+                    set('completedYear', [...completedYear]);
+
                     document.querySelectorAll('.year').forEach(y => y.removeAttribute('data-year-complete'));
 
                     // Importar tema si está presente en los datos
@@ -1532,17 +1876,69 @@
                     }
 
                     updateUI();
-                    showCustomAlert('Progreso importado exitosamente.');
+                    alert('Progreso importado exitosamente.'); // Usar alert para este mensaje
                 } else {
-                    showCustomAlert('El archivo importado no tiene el formato correcto.');
+                    alert('El archivo importado no tiene el formato correcto.');
                 }
             } catch (error) {
                 console.error('Error al parsear el archivo JSON:', error);
-                showCustomAlert('Error al importar el progreso. Asegúrate de que el archivo sea un JSON válido.');
+                alert('Error al importar el progreso. Asegúrate de que el archivo sea un JSON válido.');
             }
         };
         reader.readAsText(file);
     });
+
+    // Calendar logic
+    const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+    const dayNames = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+
+    function renderCalendar() {
+        calendarGrid.innerHTML = ''; // Clear existing days
+        currentMonthYear.textContent = `${monthNames[currentCalendarDate.getMonth()]} ${currentCalendarDate.getFullYear()}`;
+
+        const firstDayOfMonth = new Date(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth(), 1);
+        const daysInMonth = new Date(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth() + 1, 0).getDate();
+        const today = new Date();
+
+        // Adjust first day to be Monday (0=Sunday, 1=Monday, ..., 6=Saturday)
+        // If firstDayOfMonth.getDay() is 0 (Sunday), it should be 6 (last day of previous week)
+        // Otherwise, it's day - 1
+        let startDay = firstDayOfMonth.getDay();
+        if (startDay === 0) startDay = 6; // Sunday becomes last day of week (index 6)
+        else startDay = startDay - 1; // Monday=0, Tuesday=1, etc.
+
+        // Fill leading empty days
+        for (let i = 0; i < startDay; i++) {
+            const emptyDay = document.createElement('div');
+            emptyDay.classList.add('calendar-day', 'empty');
+            calendarGrid.appendChild(emptyDay);
+        }
+
+        // Fill days of the month
+        for (let i = 1; i <= daysInMonth; i++) {
+            const dayElement = document.createElement('div');
+            dayElement.classList.add('calendar-day');
+            dayElement.textContent = i;
+
+            if (i === today.getDate() && currentCalendarDate.getMonth() === today.getMonth() && currentCalendarDate.getFullYear() === today.getFullYear()) {
+                dayElement.classList.add('current-day');
+            }
+            calendarGrid.appendChild(dayElement);
+        }
+    }
+
+    prevMonthBtn.addEventListener('click', () => {
+        currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+        renderCalendar();
+    });
+
+    nextMonthBtn.addEventListener('click', () => {
+        currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+        renderCalendar();
+    });
+
+    // Initial render of the calendar
+    renderCalendar();
 
     // Inicialización de la UI al cargar la página
     updateUI();
