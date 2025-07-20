@@ -3,9 +3,584 @@
 <head>
   <meta charset="UTF-8">
   <title>Malla Interactiva QyF UNACH</title>
-  <!-- Enlace a tu archivo CSS externo -->
-  <link rel="stylesheet" href="style.css">
-  <!-- Puedes añadir enlaces a fuentes o librerías CSS aquí si las necesitas -->
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@700&display=swap');
+    :root {
+      /* Colores para el modo claro */
+      --bg: #e0f7fa;
+      --text: #333;
+      --card: #fff;
+      --accent: #1565C0;
+      --accent2: #42A5F5;
+      --green: #10B981;
+      --yellow: #FACC15;
+      --lila: #9C27B0;
+      --red: #EF5350;
+      --shadow: rgba(0,0,0,0.1);
+      --ramo-bg: #eceff1;
+      --ramo-aprobado-bg: #e1f5fe;
+      --ramo-desbloqueado-bg: #fff8e1;
+    }
+    body.dark {
+      /* Colores para el modo oscuro */
+      --bg: #1a1a1a;
+      --text: #eee;
+      --card: #2c2c2c;
+      --accent: #4a90e2;
+      --accent2: #72aeff;
+      --green: #4CAF50;
+      --yellow: #FFEB3B;
+      --lila: #AB47BC;
+      --red: #FF5252;
+      --shadow: rgba(0,0,0,0.4);
+      --ramo-bg: #3c3c3c;
+      --ramo-aprobado-bg: #30475e;
+      --ramo-desbloqueado-bg: #5f4b00;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: 'Inter', sans-serif;
+      background: var(--bg); color: var(--text);
+      transition: background .3s, color .3s;
+    }
+    /* HEADER PRINCIPAL */
+    #main-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 24px;
+      background: linear-gradient(90deg,var(--accent2),var(--accent));
+      color: #fff; font-family: 'Playfair Display', serif;
+      position: sticky; top: 0; z-index: 1000;
+      box-shadow: 0 2px 4px var(--shadow);
+    }
+    #header-left { display: flex; align-items: center; }
+    #header-left img { height: 40px; margin-right: 12px; }
+    #malla-link a {
+      color: #fff; font-weight: 600; text-decoration: none;
+      padding: 4px 8px; background: rgba(255,255,255,0.2); border-radius: 4px;
+      transition: background .2s;
+    }
+    #malla-link a:hover { background: rgba(255,255,255,0.4); }
+    #header-title {
+        font-size: 1.6em;
+        font-weight: 700;
+        text-align: center;
+        position: relative; /* Para posicionar el texto adicional */
+    }
+    #unach-qf-link {
+        color: inherit; /* Hereda el color del padre (blanco en header) */
+        text-decoration: none; /* Sin subrayado por defecto */
+        transition: text-decoration 0.2s;
+    }
+    #unach-qf-link:hover {
+        text-decoration: underline; /* Subrayar al pasar el ratón */
+    }
+    #university-name {
+        display: block; /* Para que esté en una nueva línea */
+        font-size: 0.8em; /* Tamaño de fuente más grande para el nombre de la universidad */
+        font-weight: 600;
+        color: inherit; /* Hereda el color del padre */
+        margin-top: 2px; /* Pequeño margen superior */
+    }
+
+    #header-right {
+      display: flex; align-items: center; gap: 12px;
+      font-size: .9em;
+    }
+    #clock {
+      padding: 4px 8px; background: rgba(255,255,255,0.2);
+      border-radius: 4px; font-family: monospace; min-width: 60px;
+      text-align: center;
+    }
+    /* SWITCH */
+    .switch { position: relative; display: inline-block; width: 50px; height: 24px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #ccc; transition: .4s; border-radius: 24px;
+    }
+    .slider:before {
+      position: absolute; content: "";
+      height: 16px; width: 16px; left: 4px; bottom: 4px;
+      background: white; transition: .4s; border-radius: 50%;
+    }
+    input:checked + .slider { transform: translateX(26px); }
+    /* BARRA SECUNDARIA */
+    #topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 20px; background: var(--accent);
+      color: #fff; position: sticky; top: 72px; z-index: 900;
+      box-shadow: 0 2px 4px var(--shadow);
+      font-size: .9em;
+    }
+    #regimen { display: flex; gap: 16px; flex-wrap: wrap; }
+    #topbar-controls {
+      display: flex; align-items: center; gap: 12px;
+    }
+    #topbar-controls input[type="text"],
+    #topbar-controls select {
+      padding: 6px 8px; border: none; border-radius: 4px;
+      font-size: .9em;
+      background: var(--card); /* Color de fondo para inputs/selects */
+      color: var(--text); /* Color de texto para inputs/selects */
+    }
+    #topbar-controls button {
+      background: var(--accent2); border: none; color: #fff;
+      padding: 6px 10px; border-radius: 4px; cursor: pointer;
+      transition: background .2s; font-size: .9em;
+    }
+    #topbar-controls button:hover { background: #2e7dff; }
+    #contador { font-weight: 600; margin-left: 8px; }
+
+    /* Nuevo estilo para la sección de créditos en el topbar */
+    #creditos-info {
+        margin-left: 15px;
+        font-size: 0.9em;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    #creditos-info .dot {
+        width: 8px;
+        height: 8px;
+    }
+    #creditos-info span {
+        font-weight: 600;
+    }
+    #creditos-total {
+        font-size: 1.1em;
+    }
+
+    /* Estilo para el nuevo botón de información del tr._nico */
+    .btn-info {
+        background: var(--accent2);
+        border: none;
+        color: #fff;
+        padding: 6px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background .2s;
+        font-size: .9em;
+        font-weight: 700;
+        width: 30px; /* Para que sea un botón cuadrado */
+        height: 30px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .btn-info:hover {
+        background: #2e7dff;
+    }
+
+
+    /* LAYOUT PRINCIPAL */
+    #content-wrapper {
+      display: flex; gap: 20px; padding: 20px;
+      align-items: flex-start; /* Alinea los elementos al inicio */
+    }
+    /* LEYENDA ÁREAS */
+    #legend {
+      background: var(--card); padding: 12px; border-radius: 8px;
+      box-shadow: 0 2px 6px var(--shadow); min-width: 180px;
+      color: var(--text); /* Asegura que el texto sea visible en modo oscuro */
+      margin-bottom: 20px; /* Espacio entre la leyenda y los nuevos widgets */
+    }
+    #legend table { width: 100%; border-collapse: collapse; font-size: .9em; }
+    #legend th { padding-bottom: 8px; text-align: left; }
+    #legend td { padding: 4px 0; }
+    .dot {
+      display: inline-block; width: 10px; height: 10px;
+      border-radius: 50%; margin-right: 6px; vertical-align: middle;
+    }
+    .area-espiritual { background: green; }
+    .area-general    { background: #00bcd4; }
+    .area-profesional{ background: var(--yellow); }
+    .area-especialidad { background: var(--lila); }
+    .area-practica   { background: red; }
+
+    /* Nuevo estilo para la barra lateral de widgets */
+    #left-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 20px; /* Espacio entre la leyenda y el panel de widgets */
+      min-width: 200px; /* Ancho mínimo para la barra lateral */
+      max-width: 250px; /* Ancho máximo */
+      flex-shrink: 0; /* Evita que la barra lateral se encoja */
+    }
+
+    #widgets-panel {
+      background: var(--card);
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 15px; /* Espacio entre los widgets */
+    }
+
+    #widgets-panel h3 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      color: var(--accent);
+      text-align: center;
+      font-size: 1.2em;
+    }
+
+    .widget-card {
+      padding: 10px;
+      border-radius: 6px;
+      background: var(--ramo-bg); /* Un color de fondo suave para los widgets */
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      text-align: center;
+    }
+
+    .widget-card h4 {
+      margin-top: 0;
+      margin-bottom: 8px;
+      color: var(--accent2);
+      font-size: 1em;
+    }
+
+    .widget-card a {
+      display: inline-block;
+      background: var(--accent);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 5px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: background 0.2s ease;
+    }
+
+    .widget-card a:hover {
+      background: #0d47a1;
+    }
+
+    /* Estilos para la calculadora de promedio */
+    #grade-calculator-widget {
+        text-align: left;
+    }
+    #grade-calculator-widget h4 {
+        text-align: center;
+    }
+    #semester-selector, .grade-row {
+        margin-bottom: 10px;
+    }
+    #semester-selector label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 600;
+    }
+    #semester-selector select {
+        width: 100%;
+        padding: 8px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+        background: var(--bg);
+        color: var(--text);
+    }
+    .grade-row {
+        display: flex;
+        gap: 5px;
+        margin-bottom: 8px;
+        align-items: center;
+    }
+    .grade-row input[type="text"],
+    .grade-row input[type="number"] {
+        flex: 1;
+        padding: 6px;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+        background: var(--bg);
+        color: var(--text);
+    }
+    .grade-row input[type="number"] {
+        max-width: 70px; /* Ancho para la nota */
+    }
+    .grade-row .remove-grade-row {
+        background: var(--red);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 4px 8px;
+        cursor: pointer;
+        font-size: 0.8em;
+    }
+    #grades-input-area {
+        max-height: 200px; /* Altura máxima para el área de inputs */
+        overflow-y: auto; /* Scroll si hay muchos inputs */
+        padding-right: 5px; /* Para que el scrollbar no tape el contenido */
+    }
+    #grade-calculator-widget button {
+        width: auto;
+        margin-top: 10px;
+        margin-right: 5px;
+        padding: 8px 12px;
+        font-size: 0.9em;
+    }
+    #semester-average {
+        font-weight: 700;
+        color: var(--accent);
+        font-size: 1.1em;
+    }
+
+
+    /* MALLA Y ZOOM */
+    #malla-container {
+      overflow: auto; transform-origin: top center;
+      flex-grow: 1; /* Permite que la malla ocupe el espacio restante */
+    }
+    #malla {
+      display: flex; flex-direction: column; gap: 24px;
+      width: max-content; margin: auto;
+    }
+    .year {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(240px,1fr));
+      gap: 20px;
+      background: var(--card);
+      border-radius: 8px;
+      box-shadow: 0 2px 6px var(--shadow);
+      position: relative;
+      transition: border 0.3s, box-shadow 0.3s, background 0.3s;
+    }
+    .year[data-year-complete] {
+      border: 2px solid gold;
+      box-shadow: 0 0 8px rgba(255,215,0,0.8);
+    }
+    .year-label {
+      grid-column: 1 / -1;
+      background: var(--accent2);
+      color: #fff;
+      text-align: center;
+      padding: 10px;
+      font-weight: 600;
+      font-size: 1.1em;
+    }
+    .semestre {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+    }
+    .semestre::before {
+      content: attr(data-sem)"° Semestre";
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+    .progress {
+      width: 100%; height: 8px;
+      background: #ddd; /* Fondo de la barra de progreso */
+      border-radius: 4px;
+      overflow: hidden; margin-bottom: 10px;
+    }
+    body.dark .progress {
+        background: #555; /* Fondo de la barra de progreso en modo oscuro */
+    }
+    .progress-fill {
+      width: 0; height: 100%;
+      background: var(--green);
+      transition: width .3s;
+    }
+    .ramo {
+      background: var(--ramo-bg);
+      margin: 6px 0;
+      padding: 8px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: transform .2s, box-shadow .2s, background .2s, color .2s;
+      border-left: 4px solid transparent;
+      font-size: .95em;
+      display: flex; align-items: center;
+      color: var(--text); /* Asegura que el texto sea visible */
+    }
+    .ramo .dot { margin-right: 8px; }
+    .ramo:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px var(--shadow);
+    }
+    .aprobado {
+      background: var(--ramo-aprobado-bg) !important;
+      border-left-color: var(--green) !important;
+    }
+    .desbloqueado {
+      background: var(--ramo-desbloqueado-bg) !important;
+      border-left-color: var(--yellow) !important;
+    }
+    .error {
+      animation: shake .3s;
+      background: var(--red) !important;
+      color: #fff !important;
+    }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      75% { transform: translateX(4px); }
+    }
+    .highlight {
+      border: 2px solid gold !important;
+      animation: pulse 1s infinite alternate;
+    }
+    @keyframes pulse {
+      from { box-shadow: 0 0 0 rgba(255,215,0,0.5); }
+      to   { box-shadow: 0 0 10px rgba(255,215,0,1); }
+    }
+    .empty { visibility: hidden; }
+    /* INFO Y CALCULADORAS */
+    .info-section summary {
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--accent2);
+    }
+    .info-section ul {
+      list-style: none; margin: 8px 0; padding-left: 0; font-size: .9em;
+    }
+    .calc-box {
+      background: var(--card);
+      padding: 8px 12px;
+      margin: 8px 0;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px var(--shadow);
+    }
+    .calc-box a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    /* Estilos para el Modal de Información de Ramo */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-backdrop.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-content {
+      background-color: var(--card);
+      color: var(--text);
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px var(--shadow);
+      width: 90%;
+      max-width: 500px;
+      transform: translateY(-20px);
+      transition: transform 0.3s ease;
+      position: relative;
+    }
+
+    .modal-backdrop.show .modal-content {
+      transform: translateY(0);
+    }
+
+    .modal-close-button {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      background: none;
+      border: none;
+      font-size: 1.5em;
+      cursor: pointer;
+      color: var(--text);
+    }
+
+    .modal-title {
+      font-size: 1.5em;
+      font-weight: 700;
+      margin-bottom: 15px;
+      color: var(--accent);
+    }
+
+    .modal-info p {
+      margin-bottom: 8px;
+      font-size: 0.95em;
+    }
+
+    .modal-info p strong {
+      color: var(--accent2);
+    }
+
+    .modal-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .modal-buttons button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background-color 0.2s ease;
+    }
+
+    .modal-buttons .btn-aprobado {
+      background-color: var(--green);
+      color: white;
+    }
+
+    .modal-buttons .btn-aprobado:hover {
+      background-color: #0b9e6f;
+    }
+
+    .modal-buttons .btn-desmarcar {
+      background-color: var(--red);
+      color: white;
+    }
+
+    .modal-buttons .btn-desmarcar:hover {
+      background-color: #d84315;
+    }
+
+    .modal-buttons .btn-close {
+        background-color: #ccc;
+        color: var(--text);
+    }
+
+    .modal-buttons .btn-close:hover {
+        background-color: #bbb;
+    }
+
+    /* Estilos para el modal de confirmación personalizado */
+    .custom-confirm-modal .modal-content {
+        max-width: 400px;
+        text-align: center;
+    }
+    .custom-confirm-modal .modal-title {
+        color: var(--red);
+    }
+    .custom-confirm-modal .modal-buttons {
+        justify-content: center;
+    }
+
+    /* Estilos para el modal de mensaje personalizado (tr._nico) */
+    .custom-alert-modal .modal-content {
+        max-width: 400px;
+        text-align: center;
+    }
+    .custom-alert-modal .modal-title {
+        color: var(--accent); /* Color principal para el título del mensaje */
+    }
+    .custom-alert-modal .modal-buttons {
+        justify-content: center;
+    }
+  </style>
 </head>
 <body>
   <!-- HEADER PRINCIPAL -->
@@ -95,16 +670,47 @@
 
   <!-- CONTENIDO PRINCIPAL -->
   <div id="content-wrapper">
-    <!-- LEYENDA ÁREAS -->
-    <div id="legend">
-      <table>
-        <tr><th>ÁREAS DE FORMACIÓN</th></tr>
-        <tr><td><span class="dot area-espiritual"></span>Espiritual</td></tr>
-        <tr><td><span class="dot area-general"></span>General</td></tr>
-        <tr><td><span class="dot area-profesional"></span>Profesional</td></tr>
-        <tr><td><span class="dot area-especialidad"></span>Especialidad</td></tr>
-        <tr><td><span class="dot area-practica"></span>Práctica</td></tr>
-      </table>
+    <!-- Barra lateral izquierda con Leyenda y Widgets -->
+    <div id="left-sidebar">
+      <!-- LEYENDA ÁREAS -->
+      <div id="legend">
+        <table>
+          <tr><th>ÁREAS DE FORMACIÓN</th></tr>
+          <tr><td><span class="dot area-espiritual"></span>Espiritual</td></tr>
+          <tr><td><span class="dot area-general"></span>General</td></tr>
+          <tr><td><span class="dot area-profesional"></span>Profesional</td></tr>
+          <tr><td><span class="dot area-especialidad"></span>Especialidad</td></tr>
+          <tr><td><span class="dot area-practica"></span>Práctica</td></tr>
+        </table>
+      </div>
+
+      <!-- Panel de Widgets -->
+      <div id="widgets-panel">
+        <h3>Recursos Rápidos</h3>
+        <div class="widget-card">
+          <h4>Drive de la Carrera</h4>
+          <a href="https://drive.google.com/drive/folders/1ts_jjP9MPqLo5sXeXgoDHL8_3fO_DXCm?hl=es" target="_blank">Acceder al Drive</a>
+        </div>
+        <div class="widget-card">
+          <h4>Biblioteca UNACH</h4>
+          <a href="https://biblioteca.unach.cl/basesdatossuscritas/" target="_blank">Ir a la Biblioteca</a>
+        </div>
+        <div class="widget-card" id="grade-calculator-widget">
+          <h4>Calculadora de Promedio Semestral</h4>
+          <div id="semester-selector">
+            <label for="select-semester">Seleccionar Semestre:</label>
+            <select id="select-semester">
+              <!-- Opciones de semestre se llenarán con JS -->
+            </select>
+          </div>
+          <div id="grades-input-area">
+            <!-- Aquí se añadirán dinámicamente los campos de nota -->
+          </div>
+          <button id="add-grade-row-btn" class="btn-aprobado">Añadir Asignatura</button>
+          <button id="calculate-average-btn" class="btn-info">Calcular Promedio</button>
+          <p>Promedio Semestral: <span id="semester-average">N/A</span></p>
+        </div>
+      </div>
     </div>
 
     <!-- MALLA -->
@@ -130,7 +736,7 @@
             <div class="ramo" data-code="QYFFPF600" data-area="profesional" data-creditos="5" data-desc="Conceptos de física aplicados a la farmacia.">
               <span class="dot area-profesional"></span>Física para Farmacia
             </div>
-            <div class="ramo" data-code="QYFICF600" data-area="profesional" data-creditos="2" data-desc="Introducción a los principios y áreas de las ciencias farmacéuticas.">
+            <div class="ramo" data-code="QYFICF600" data-area="profesional" data-creditos="2" data-desc="Introducción a las Ciencias Farmacéuticas.">
               <span class="dot area-profesional"></span>Introducción a las Ciencias Farmacéuticas
             </div>
             <div class="ramo" data-code="QYFING601" data-area="general" data-creditos="2" data-desc="Desarrollo de habilidades básicas en el idioma inglés.">
@@ -255,7 +861,7 @@
           </div>
           <div class="semestre" data-sem="6">
             <div class="progress"><div class="progress-fill"></div></div>
-            <div class="ramo" data-code="QYFSRS600" data-area="general" data-creditos="2" data-desc="Importancia del autocuidado, responsabilidad social y medioambiental.">
+            <div class="ramo" data-code="QYFSRS600" data-area="general" data-creditos="2" data-desc="Importancia del autocuidado, responsabilidad social y medioambiente.">
               <span class="dot area-general"></span>Salud y Autocuidado, Responsabilidad Social y Medioambiente
             </div>
             <div class="ramo" data-code="QYFBQC600"  data-req="QYFBGF600" data-area="profesional" data-creditos="4" data-desc="Aplicación de la bioquímica en el diagnóstico y seguimiento clínico.">
@@ -441,7 +1047,567 @@
     </div>
   </div>
 
-  <!-- Enlace a tu archivo JavaScript externo -->
-  <script src="script.js"></script>
+  <script>
+    // Referencias a los elementos del DOM
+    const ramos = document.querySelectorAll('.ramo'),
+          get   = k=>JSON.parse(localStorage.getItem(k))||[], // Obtiene datos del localStorage
+          set   = (k,v)=>localStorage.setItem(k,JSON.stringify(v)), // Guarda datos en el localStorage
+          busc  = document.getElementById('buscador'),
+          areaF = document.getElementById('area-filter'),
+          zoomR = document.getElementById('zoom'),
+          clk   = document.getElementById('clock'),
+          themeSwitch = document.getElementById('theme-switch'),
+          container = document.getElementById('malla-container');
+
+    // Referencias a elementos del modal de información de ramo
+    const ramoInfoModal = document.getElementById('ramo-info-modal');
+    const modalRamoNombre = document.getElementById('modal-ramo-nombre');
+    const modalRamoCode = document.getElementById('modal-ramo-code');
+    const modalRamoArea = document.getElementById('modal-ramo-area');
+    const modalRamoCreditos = document.getElementById('modal-ramo-creditos');
+    const modalRamoReq = document.getElementById('modal-ramo-req');
+    const modalRamoDesc = document.getElementById('modal-ramo-desc');
+    const modalBtnAprobado = document.getElementById('modal-btn-aprobado');
+    const modalBtnDesmarcar = document.getElementById('modal-btn-desmarcar');
+    const modalCloseButton = ramoInfoModal.querySelector('.modal-close-button');
+    const modalBtnClose = document.getElementById('modal-btn-close');
+
+    // Referencias a elementos del modal de confirmación personalizado
+    const customConfirmModal = document.getElementById('custom-confirm-modal');
+    const confirmResetYes = document.getElementById('confirm-reset-yes');
+    const confirmResetNo = document.getElementById('confirm-reset-no');
+
+    // Referencias a elementos de créditos
+    const creditosTotalSpan = document.getElementById('creditos-total');
+    const creditosEspiritualSpan = document.getElementById('creditos-espiritual');
+    const creditosGeneralSpan = document.getElementById('creditos-general');
+    const creditosProfesionalSpan = document.getElementById('creditos-profesional');
+    const creditosEspecialidadSpan = document.getElementById('creditos-especialidad');
+    const creditosPracticaSpan = document.getElementById('creditos-practica');
+
+    // Nuevas referencias para el botón y modal del mensaje del tr._nico
+    const trNicoInfoBtn = document.getElementById('tr-nico-info-btn');
+    const trNicoMessageModal = document.getElementById('tr-nico-message-modal');
+    const trNicoModalCloseBtn = document.getElementById('tr-nico-modal-close-btn');
+    const trNicoMessageModalCloseButton = trNicoMessageModal.querySelector('.modal-close-button');
+
+    // Nuevas referencias para los botones de Exportar/Importar
+    const exportBtn = document.getElementById('export-btn');
+    const importBtn = document.getElementById('import-btn');
+    const importFile = document.getElementById('import-file');
+
+    // Referencias para la calculadora de promedio
+    const selectSemester = document.getElementById('select-semester');
+    const gradesInputArea = document.getElementById('grades-input-area');
+    const addGradeRowBtn = document.getElementById('add-grade-row-btn');
+    const calculateAverageBtn = document.getElementById('calculate-average-btn');
+    const semesterAverageSpan = document.getElementById('semester-average');
+
+
+    // Variables de estado
+    let aprobados = new Set(get('aprobados')), // Conjunto de ramos aprobados
+        totalRamos = ramos.length, // Total de ramos en la malla
+        completedSem = new Set(), // Semestres completados (para alertas)
+        completedYear = new Set(); // Años completados (para alertas)
+
+    // Almacenamiento de notas por semestre
+    let semesterGrades = get('semesterGrades') || {};
+
+    // Función para actualizar el reloj en el encabezado
+    function updateClock(){
+      const now = new Date(),
+            h = String(now.getHours()).padStart(2,'0'),
+            m = String(now.getMinutes()).padStart(2,'0'),
+            s = String(now.getSeconds()).padStart(2,'0');
+      clk.textContent = `${h}:${m}:${s}`;
+    }
+    // Actualiza el reloj cada segundo
+    setInterval(updateClock,1000);
+    updateClock(); // Llama una vez al inicio para mostrar la hora inmediatamente
+
+    // Lógica para el cambio de tema (claro/oscuro)
+    // Carga el estado del tema al iniciar la página desde localStorage
+    if (localStorage.getItem('dark') === 'true') {
+        document.body.classList.add('dark');
+        themeSwitch.checked = true;
+    } else {
+        themeSwitch.checked = false;
+    }
+
+    // Escucha el evento de cambio del switch para alternar el tema
+    themeSwitch.addEventListener('change', ()=>{
+      document.body.classList.toggle('dark', themeSwitch.checked);
+      localStorage.setItem('dark', document.body.classList.contains('dark'));
+    });
+
+    // Lógica para el zoom de la malla
+    zoomR.addEventListener('input', e=>{
+      container.style.transform = `scale(${e.target.value/100})`;
+    });
+    // Aplica el zoom inicial al cargar la página
+    container.style.transform = `scale(${zoomR.value/100})`;
+
+    // Función para desmarcar ramos en cascada (si un prerequisito es desmarcado)
+    function cascadeRemove(code){
+      aprobados.delete(code); // Elimina el ramo actual del conjunto de aprobados
+      ramos.forEach(r=>{
+        const deps = r.dataset.req ? r.dataset.req.split(',') : [];
+        // Si este ramo depende del ramo desmarcado y también está aprobado, desmárcalo en cascada
+        if(deps.includes(code) && aprobados.has(r.dataset.code))
+          cascadeRemove(r.dataset.code);
+      });
+    }
+
+    // Función principal para actualizar la interfaz de usuario
+    function updateUI(){
+      let approvedCount = 0; // Contador de ramos aprobados globalmente
+      let totalCreditosAprobados = 0;
+      let creditosPorArea = {
+          espiritual: 0,
+          general: 0,
+          profesional: 0,
+          especialidad: 0,
+          practica: 0
+      };
+
+      // Itera sobre cada semestre para actualizar su progreso y estado de los ramos
+      document.querySelectorAll('.semestre').forEach(s=>{
+        const hijos = s.querySelectorAll('.ramo'); // Todos los ramos en el semestre
+        const prog  = s.querySelector('.progress-fill'); // La barra de progreso del semestre
+
+        // Verifica si la barra de progreso existe antes de intentar acceder a su estilo
+        if (!prog) {
+            return; // Salta este semestre si no tiene una barra de progreso (ej. semestres vacíos)
+        }
+
+        let aproS = 0; // Contador de ramos aprobados en el semestre actual
+
+        hijos.forEach(r=>{
+          const code = r.dataset.code, // Código del ramo
+                deps = r.dataset.req ? r.dataset.req.split(',') : []; // Prerequisitos del ramo
+          r.classList.remove('aprobado','desbloqueado','highlight'); // Limpia clases anteriores
+
+          if(aprobados.has(code)){
+            r.classList.add('aprobado'); // Marca como aprobado
+            aproS++; // Incrementa el contador de aprobados del semestre
+
+            // Sumar créditos para el total y por área
+            const creditos = parseInt(r.dataset.creditos);
+            const area = r.dataset.area;
+            if (!isNaN(creditos)) {
+                totalCreditosAprobados += creditos;
+                if (creditosPorArea[area] !== undefined) {
+                    creditosPorArea[area] += creditos;
+                }
+            }
+          } else if(deps.length > 0 && deps.every(q => aprobados.has(q))){
+            r.classList.add('desbloqueado'); // Marca como desbloqueado si los prerequisitos están aprobados
+          }
+        });
+
+        // Actualiza la barra de progreso del semestre
+        if (hijos.length > 0) {
+            prog.style.width = (aproS / hijos.length * 100) + '%';
+        } else {
+            prog.style.width = '0%'; // Si no hay ramos, el progreso es 0
+        }
+
+        const sem = s.dataset.sem;
+        // Muestra una alerta si el semestre está completo y no se ha alertado antes
+        if(aproS === hijos.length && hijos.length > 0 && !completedSem.has(sem)){
+          showCustomAlert(`¡Felicidades, sobreviviste al ${sem}° semestre!`);
+          completedSem.add(sem);
+        }
+      });
+
+      // Recalcula el contador global de progreso de la malla
+      approvedCount = aprobados.size;
+      document.getElementById('contador').textContent = Math.round(approvedCount / totalRamos * 100) + '%';
+
+      // Actualizar los créditos en la UI
+      creditosTotalSpan.textContent = totalCreditosAprobados;
+      creditosEspiritualSpan.textContent = creditosPorArea.espiritual;
+      creditosGeneralSpan.textContent = creditosPorArea.general;
+      creditosProfesionalSpan.textContent = creditosPorArea.profesional;
+      creditosEspecialidadSpan.textContent = creditosPorArea.especialidad;
+      creditosPracticaSpan.textContent = creditosPorArea.practica;
+
+
+      // Itera sobre cada año para verificar si está completo
+      document.querySelectorAll('.year').forEach(y=>{
+        const year = y.dataset.year;
+        if(year){
+          const sems = y.querySelectorAll('.semestre:not(.empty)'), // Semestres del año (excluyendo los vacíos)
+                // Verifica si todos los semestres del año tienen el 100% de progreso
+                allSemestersComplete  = [...sems].every(s=>
+                  parseFloat(s.querySelector('.progress-fill').style.width) === 100);
+          // Si el año está completo y no se ha alertado antes
+          if(allSemestersComplete && !completedYear.has(year)){
+            y.setAttribute('data-year-complete',''); // Añade un atributo para el estilo visual
+            showCustomAlert(`¡Felicidades, completaste el ${year}° año!`);
+            completedYear.add(year);
+          }
+        }
+      });
+    }
+
+    // Función para mostrar un modal de alerta personalizado (se mantiene el alert() por ahora)
+    function showCustomAlert(message) {
+        alert(message);
+    }
+
+    // Función para mostrar el modal de información del ramo
+    let currentRamoElement = null; // Para almacenar el elemento del ramo que abrió el modal
+
+    function showRamoInfoModal(ramoElement) {
+        currentRamoElement = ramoElement; // Guarda el elemento del ramo actual
+
+        const code = ramoElement.dataset.code;
+        const nombre = ramoElement.textContent.trim();
+        const area = ramoElement.dataset.area;
+        const creditos = ramoElement.dataset.creditos || 'N/A';
+        const prerequisitos = ramoElement.dataset.req ? ramoElement.dataset.req.split(',').map(reqCode => {
+            const reqRamo = document.querySelector(`.ramo[data-code="${reqCode}"]`);
+            return reqRamo ? reqRamo.textContent.trim() : reqCode;
+        }).join(', ') : 'Ninguno';
+        const descripcion = ramoElement.dataset.desc || 'No hay descripción disponible.';
+
+        modalRamoNombre.textContent = nombre;
+        modalRamoCode.textContent = code;
+        modalRamoArea.textContent = area.charAt(0).toUpperCase() + area.slice(1); // Capitalizar la primera letra
+        modalRamoCreditos.textContent = creditos;
+        modalRamoReq.textContent = prerequisitos;
+        modalRamoDesc.textContent = descripcion;
+
+        // Actualizar el estado de los botones de aprobar/desmarcar
+        if (aprobados.has(code)) {
+            modalBtnAprobado.style.display = 'none';
+            modalBtnDesmarcar.style.display = 'inline-block';
+        } else {
+            modalBtnAprobado.style.display = 'inline-block';
+            modalBtnDesmarcar.style.display = 'none';
+        }
+
+        ramoInfoModal.classList.add('show');
+    }
+
+    // Función para ocultar el modal de información del ramo
+    function hideRamoInfoModal() {
+        ramoInfoModal.classList.remove('show');
+        currentRamoElement = null; // Limpia la referencia al ramo
+    }
+
+    // Manejador de clic en un ramo
+    ramos.forEach(r=> r.onclick=()=>{
+      showRamoInfoModal(r); // Abre el modal de información del ramo
+    });
+
+    // Event listeners para los botones del modal de información del ramo
+    modalCloseButton.addEventListener('click', hideRamoInfoModal);
+    modalBtnClose.addEventListener('click', hideRamoInfoModal);
+    ramoInfoModal.addEventListener('click', (e) => {
+        if (e.target === ramoInfoModal) { // Solo cierra si se hace clic en el fondo
+            hideRamoInfoModal();
+        }
+    });
+
+    modalBtnAprobado.addEventListener('click', () => {
+        if (currentRamoElement) {
+            const code = currentRamoElement.dataset.code;
+            const deps = currentRamoElement.dataset.req ? currentRamoElement.dataset.req.split(',') : [];
+
+            if (deps.length > 0 && !deps.every(q => aprobados.has(q))) {
+                const falt = deps.find(q => !aprobados.has(q));
+                const nom = document.querySelector(`.ramo[data-code="${falt}"]`).textContent;
+                currentRamoElement.classList.add('error');
+                showCustomAlert(`Lo siento, aún no has aprobado "${nom.trim()}" para aprobar este ramo.`);
+                currentRamoElement.addEventListener('animationend', () => currentRamoElement.classList.remove('error'), { once: true });
+            } else {
+                aprobados.add(code);
+                set('aprobados', [...aprobados]);
+                updateUI();
+                hideRamoInfoModal();
+            }
+        }
+    });
+
+    modalBtnDesmarcar.addEventListener('click', () => {
+        if (currentRamoElement) {
+            const code = currentRamoElement.dataset.code;
+            cascadeRemove(code);
+            set('aprobados', [...aprobados]);
+            updateUI();
+            hideRamoInfoModal();
+        }
+    });
+
+
+    // Funciones para el buscador y filtro por área
+    const normalize = s=> s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); // Normaliza texto
+    function filterRamos(){
+      const q    = normalize(busc.value), // Valor del buscador normalizado
+            area = areaF.value; // Valor del filtro de área
+      ramos.forEach(r=>{
+        const txt = normalize(r.textContent), // Texto del ramo normalizado
+              a   = r.dataset.area; // Área del ramo
+        // Muestra u oculta el ramo según el filtro y el buscador
+        if((!q||txt.includes(q)) && (!area||a===area)){
+          r.style.display='';
+          // Añade o quita la clase 'highlight' si hay un filtro aplicado
+          if(q !== '' || area !== '') {
+              r.classList.add('highlight');
+          } else {
+              r.classList.remove('highlight');
+          }
+        } else {
+          r.style.display='none';
+          r.classList.remove('highlight');
+        }
+      });
+    }
+    // Escucha eventos de input y cambio para aplicar los filtros
+    busc.addEventListener('input',filterRamos);
+    areaF.addEventListener('change',filterRamos);
+
+    // Función para mostrar el modal de confirmación personalizado
+    let confirmCallback = null; // Para almacenar la función a ejecutar si se confirma
+
+    function showCustomConfirm(message, onConfirm) {
+        // El mensaje ya está fijo en el HTML para este modal específico
+        customConfirmModal.classList.add('show');
+        confirmCallback = onConfirm; // Guarda la función de callback
+    }
+
+    function hideCustomConfirm() {
+        customConfirmModal.classList.remove('show');
+        confirmCallback = null; // Limpia el callback
+    }
+
+    // Manejador de clic para el botón "Reiniciar"
+    function reset(){
+      showCustomConfirm('¿Estás seguro de que quieres reiniciar todo el progreso? Esto no se puede deshacer.', () => {
+        localStorage.removeItem('aprobados'); // Elimina los datos de aprobados
+        localStorage.removeItem('semesterGrades'); // Elimina también las notas de los semestres
+        aprobados.clear(); // Limpia el conjunto de aprobados
+        completedSem.clear(); // Limpia los semestres completados
+        completedYear.clear(); // Limpia los años completados
+        document.querySelectorAll('.year').forEach(y => y.removeAttribute('data-year-complete')); // Quita el atributo visual de año completo
+        semesterGrades = {}; // Reinicia las notas
+        populateSemesterSelector(); // Vuelve a popular el selector de semestre
+        loadGradesForSelectedSemester(); // Carga las notas del semestre seleccionado (que ahora estará vacío)
+        updateUI(); // Actualiza la interfaz de usuario
+        hideCustomConfirm();
+      });
+    }
+
+    // Event listeners para los botones del modal de confirmación
+    confirmResetYes.addEventListener('click', () => {
+        if (confirmCallback) {
+            confirmCallback();
+        }
+    });
+
+    confirmResetNo.addEventListener('click', hideCustomConfirm);
+
+    customConfirmModal.addEventListener('click', (e) => {
+        if (e.target === customConfirmModal) {
+            hideCustomConfirm();
+        }
+    });
+
+    // Funciones para el nuevo modal del mensaje del tr._nico
+    function showTrNicoMessageModal() {
+        trNicoMessageModal.classList.add('show');
+    }
+
+    function hideTrNicoMessageModal() {
+        trNicoMessageModal.classList.remove('show');
+    }
+
+    // Event listeners para el botón y el modal del mensaje del tr._nico
+    trNicoInfoBtn.addEventListener('click', showTrNicoMessageModal);
+    trNicoModalCloseBtn.addEventListener('click', hideTrNicoMessageModal);
+    trNicoMessageModalCloseButton.addEventListener('click', hideTrNicoMessageModal);
+    trNicoMessageModal.addEventListener('click', (e) => {
+        if (e.target === trNicoMessageModal) {
+            hideTrNicoMessageModal();
+        }
+    });
+
+    // Funciones de Exportar/Importar Progreso
+    exportBtn.addEventListener('click', () => {
+        const dataToExport = {
+            aprobados: [...aprobados],
+            semesterGrades: semesterGrades
+        };
+        const dataStr = JSON.stringify(dataToExport); // Convierte el Set a Array y luego a String JSON
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'progreso_malla_unach.json';
+        document.body.appendChild(a); // Necesario para Firefox
+        a.click();
+        document.body.removeChild(a); // Limpiar
+        URL.revokeObjectURL(url); // Liberar el objeto URL
+        showCustomAlert('Progreso exportado exitosamente como "progreso_malla_unach.json"');
+    });
+
+    importBtn.addEventListener('click', () => {
+        importFile.click(); // Simula el clic en el input de tipo file
+    });
+
+    importFile.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (!file) {
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const importedData = JSON.parse(e.target.result);
+                if (importedData && importedData.aprobados && Array.isArray(importedData.aprobados)) {
+                    aprobados = new Set(importedData.aprobados);
+                    set('aprobados', [...aprobados]);
+                    // Reiniciar estados de semestres/años completados para que se recalcule
+                    completedSem.clear();
+                    completedYear.clear();
+                    document.querySelectorAll('.year').forEach(y => y.removeAttribute('data-year-complete'));
+
+                    // Importar notas de semestres
+                    if (importedData.semesterGrades) {
+                        semesterGrades = importedData.semesterGrades;
+                        set('semesterGrades', semesterGrades);
+                        populateSemesterSelector(); // Vuelve a popular y selecciona el primero si existe
+                        loadGradesForSelectedSemester();
+                    }
+
+                    updateUI();
+                    showCustomAlert('Progreso importado exitosamente.');
+                } else {
+                    showCustomAlert('El archivo importado no tiene el formato correcto.');
+                }
+            } catch (error) {
+                console.error('Error al parsear el archivo JSON:', error);
+                showCustomAlert('Error al importar el progreso. Asegúrate de que el archivo sea un JSON válido.');
+            }
+        };
+        reader.readAsText(file);
+    });
+
+    // Lógica para la Calculadora de Promedio Semestral
+    function populateSemesterSelector() {
+        selectSemester.innerHTML = ''; // Limpiar opciones existentes
+        const semesters = new Set();
+        document.querySelectorAll('.semestre').forEach(s => {
+            semesters.add(s.dataset.sem);
+        });
+
+        // Ordenar los semestres numéricamente
+        const sortedSemesters = Array.from(semesters).sort((a, b) => parseInt(a) - parseInt(b));
+
+        sortedSemesters.forEach(sem => {
+            const option = document.createElement('option');
+            option.value = sem;
+            option.textContent = `Semestre ${sem}`;
+            selectSemester.appendChild(option);
+        });
+
+        // Seleccionar el primer semestre por defecto o el último guardado
+        if (sortedSemesters.length > 0) {
+            const lastSelectedSemester = localStorage.getItem('lastSelectedSemester');
+            if (lastSelectedSemester && sortedSemesters.includes(lastSelectedSemester)) {
+                selectSemester.value = lastSelectedSemester;
+            } else {
+                selectSemester.value = sortedSemesters[0];
+            }
+            loadGradesForSelectedSemester();
+        } else {
+            gradesInputArea.innerHTML = ''; // Limpiar si no hay semestres
+            semesterAverageSpan.textContent = 'N/A';
+        }
+    }
+
+    function addGradeRow(subjectName = '', grade = '') {
+        const div = document.createElement('div');
+        div.classList.add('grade-row');
+        div.innerHTML = `
+            <input type="text" class="subject-name" placeholder="Nombre Asignatura" value="${subjectName}">
+            <input type="number" class="subject-grade" placeholder="Nota (1-100)" min="1" max="100" value="${grade}">
+            <button class="remove-grade-row btn-desmarcar">X</button>
+        `;
+        gradesInputArea.appendChild(div);
+
+        div.querySelector('.remove-grade-row').addEventListener('click', () => {
+            div.remove();
+            saveGradesForSelectedSemester();
+            calculateSemesterAverage();
+        });
+
+        // Guardar cambios automáticamente al modificar inputs
+        div.querySelector('.subject-name').addEventListener('input', saveGradesForSelectedSemester);
+        div.querySelector('.subject-grade').addEventListener('input', () => {
+            saveGradesForSelectedSemester();
+            calculateSemesterAverage();
+        });
+    }
+
+    function saveGradesForSelectedSemester() {
+        const selectedSem = selectSemester.value;
+        if (!selectedSem) return;
+
+        const grades = [];
+        gradesInputArea.querySelectorAll('.grade-row').forEach(row => {
+            const name = row.querySelector('.subject-name').value.trim();
+            const grade = row.querySelector('.subject-grade').value.trim();
+            if (name && grade) {
+                grades.push({ name, grade: parseFloat(grade) });
+            }
+        });
+        semesterGrades[selectedSem] = grades;
+        set('semesterGrades', semesterGrades);
+        localStorage.setItem('lastSelectedSemester', selectedSem);
+    }
+
+    function loadGradesForSelectedSemester() {
+        gradesInputArea.innerHTML = ''; // Limpiar inputs existentes
+        const selectedSem = selectSemester.value;
+        if (selectedSem && semesterGrades[selectedSem]) {
+            semesterGrades[selectedSem].forEach(gradeEntry => {
+                addGradeRow(gradeEntry.name, gradeEntry.grade);
+            });
+        }
+        calculateSemesterAverage(); // Recalcular el promedio al cargar
+    }
+
+    function calculateSemesterAverage() {
+        const grades = [];
+        gradesInputArea.querySelectorAll('.subject-grade').forEach(input => {
+            const grade = parseFloat(input.value);
+            if (!isNaN(grade) && grade >= 1 && grade <= 100) {
+                grades.push(grade);
+            }
+        });
+
+        if (grades.length === 0) {
+            semesterAverageSpan.textContent = 'N/A';
+            return;
+        }
+
+        const sum = grades.reduce((total, grade) => total + grade, 0);
+        const average = sum / grades.length;
+        semesterAverageSpan.textContent = average.toFixed(2); // Mostrar con 2 decimales
+    }
+
+    // Event Listeners para la calculadora de promedio
+    selectSemester.addEventListener('change', loadGradesForSelectedSemester);
+    addGradeRowBtn.addEventListener('click', () => addGradeRow());
+    calculateAverageBtn.addEventListener('click', calculateSemesterAverage);
+
+    // Inicialización de la UI al cargar la página
+    populateSemesterSelector(); // Primero popular el selector de semestres
+    updateUI(); // Luego actualizar el resto de la UI
+  </script>
 </body>
 </html>
