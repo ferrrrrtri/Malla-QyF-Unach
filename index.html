@@ -934,7 +934,7 @@
       <label for="theme-selector">Tema:</label>
       <select id="theme-selector">
         <option value="light">Claro</option>
-        <option value="dark">Oscuro</option>
+        <option value="dark">Oscero</option>
         <option value="pastel">Pastel</option>
         <option value="celeste">Celeste</option>
         <option value="rosado">Rosado</option>
@@ -1891,85 +1891,239 @@
         reader.readAsText(file);
     });
 
-    // Lógica para Exportar Imagen de la Malla
+    // Function to create a dot with specific area color (moved from imageExporter.js)
+    const createDot = (area) => {
+        const dot = document.createElement('span');
+        dot.classList.add('dot');
+        dot.style.display = 'inline-block';
+        dot.style.width = '10px';
+        dot.style.height = '10px';
+        dot.style.borderRadius = '50%';
+        dot.style.marginRight = '6px';
+        dot.style.verticalAlign = 'middle';
+        const bodyStyle = getComputedStyle(document.body); // Get style here
+        const yellowColor = bodyStyle.getPropertyValue('--yellow');
+        switch (area) {
+            case 'espiritual': dot.style.backgroundColor = 'green'; break;
+            case 'general': dot.style.backgroundColor = '#00bcd4'; break;
+            case 'profesional': dot.style.backgroundColor = yellowColor; break;
+            case 'especialidad': dot.style.backgroundColor = bodyStyle.getPropertyValue('--lila'); break;
+            case 'practica': dot.style.backgroundColor = bodyStyle.getPropertyValue('--red'); break;
+        }
+        return dot;
+    };
+
+    // Image export functionality (integrated from imageExporter.js)
     exportImageBtn.addEventListener('click', async () => {
-        // Show a loading message
         const originalButtonText = exportImageBtn.textContent;
         exportImageBtn.textContent = 'Generando imagen...';
         exportImageBtn.disabled = true;
 
-        const mallaElement = document.getElementById('malla'); // El contenedor principal de la malla
         const totalCreditsText = `Créditos Totales: ${creditosTotalSpan.textContent}/330`;
-        const themeName = themeSelector.value; // Obtener el nombre del tema actual
-        const currentThemeDisplay = themeSelector.options[themeSelector.selectedIndex].text; // Obtener el texto visible del tema
-        const currentDateTime = clk.textContent; // Obtener la fecha y hora actual
+        const themeName = themeSelector.value;
+        const currentThemeDisplay = themeSelector.options[themeSelector.selectedIndex].text;
+        const currentDateTime = clk.textContent;
+
+        // Get current computed styles for dynamic elements
+        const bodyStyle = getComputedStyle(document.body);
+        const accentColor = bodyStyle.getPropertyValue('--accent');
+        const accent2Color = bodyStyle.getPropertyValue('--accent2');
+        const textColor = bodyStyle.getPropertyValue('--text');
+        const cardColor = bodyStyle.getPropertyValue('--card');
+        const ramoBgColor = bodyStyle.getPropertyValue('--ramo-bg');
+        const ramoAprobadoBgColor = bodyStyle.getPropertyValue('--ramo-aprobado-bg');
+        const greenColor = bodyStyle.getPropertyValue('--green');
+        const yellowColor = bodyStyle.getPropertyValue('--yellow');
+
 
         try {
-            // Capturar el contenido de la malla
-            const canvas = await html2canvas(mallaElement, {
-                scale: 2, // Aumentar la escala para una mejor resolución de la imagen
-                useCORS: true, // Intentar manejar imágenes de origen cruzado (como logo.png si fuera externo)
-                backgroundColor: null // Permitir que el fondo sea transparente o herede del body
+            if (typeof html2canvas === 'undefined') {
+                console.error('html2canvas library is not loaded.');
+                alert('Error: La librería html2canvas no está disponible. No se puede exportar la imagen.');
+                return;
+            }
+
+            // 1. Create a temporary, hidden element for PDF-like rendering
+            const tempMallaContainer = document.createElement('div');
+            tempMallaContainer.style.position = 'absolute';
+            tempMallaContainer.style.left = '-9999px'; // Hide it off-screen
+            tempMallaContainer.style.width = '1920px'; // Target width for HD 16:9
+            tempMallaContainer.style.padding = '30px';
+            tempMallaContainer.style.backgroundColor = bodyStyle.getPropertyValue('--bg');
+            tempMallaContainer.style.color = textColor;
+            tempMallaContainer.style.fontFamily = 'Inter, sans-serif';
+            tempMallaContainer.style.boxSizing = 'border-box'; // Ensure padding is included in width
+
+            // 2. Populate the hidden div with PDF-like malla structure
+            const yearsData = {};
+            // Group ramos by year and then by semester
+            ramos.forEach(ramoElement => {
+                const year = ramoElement.closest('.year').dataset.year;
+                const semester = ramoElement.closest('.semestre').dataset.sem;
+                if (!yearsData[year]) yearsData[year] = {};
+                if (!yearsData[year][semester]) yearsData[year][semester] = [];
+                yearsData[year][semester].push(ramoElement);
             });
 
-            // Crear un nuevo canvas para combinar la malla y el texto
+            for (const yearNum in yearsData) {
+                const yearDiv = document.createElement('div');
+                yearDiv.style.marginBottom = '20px';
+                yearDiv.style.border = `1px solid ${cardColor}`;
+                yearDiv.style.borderRadius = '8px';
+                yearDiv.style.overflow = 'hidden';
+                yearDiv.style.boxShadow = '0 2px 6px rgba(0,0,0,0.1)'; // Use a subtle shadow
+                yearDiv.style.backgroundColor = cardColor;
+                yearDiv.style.boxSizing = 'border-box';
+
+                const yearLabel = document.createElement('div');
+                yearLabel.textContent = `${yearNum}° AÑO`;
+                yearLabel.style.background = `linear-gradient(90deg, ${accent2Color}, ${accentColor})`;
+                yearLabel.style.color = '#fff';
+                yearLabel.style.padding = '10px';
+                yearLabel.style.fontWeight = '600';
+                yearLabel.style.fontSize = '1.1em';
+                yearLabel.style.textAlign = 'center';
+                yearDiv.appendChild(yearLabel);
+
+                const semestersRow = document.createElement('div');
+                semestersRow.style.display = 'grid';
+                semestersRow.style.gridTemplateColumns = '1fr 1fr'; // Two columns for semesters
+                semestersRow.style.gap = '15px';
+                semestersRow.style.padding = '15px';
+                semestersRow.style.boxSizing = 'border-box';
+                yearDiv.appendChild(semestersRow);
+
+                // Assuming semesters are 1 and 2 for each year in the PDF-like layout
+                for (let semIndex = 1; semIndex <= 2; semIndex++) {
+                    const actualSemNum = (parseInt(yearNum) - 1) * 2 + semIndex; // Calculate actual semester number from original data
+                    const semesterDiv = document.createElement('div');
+                    semesterDiv.style.border = `1px dashed ${bodyStyle.getPropertyValue('--text')}33`; // Lighter dashed border
+                    semesterDiv.style.padding = '10px';
+                    semesterDiv.style.borderRadius = '5px';
+                    semesterDiv.style.backgroundColor = ramoBgColor;
+                    semesterDiv.style.boxSizing = 'border-box';
+
+                    const semLabel = document.createElement('div');
+                    semLabel.textContent = `${actualSemNum}° Semestre`;
+                    semLabel.style.fontWeight = '600';
+                    semLabel.style.marginBottom = '10px';
+                    semLabel.style.color = accentColor;
+                    semesterDiv.appendChild(semLabel);
+
+                    const semesterRamos = yearsData[yearNum]?.[actualSemNum];
+                    if (semesterRamos) {
+                        semesterRamos.forEach(ramoElement => {
+                            const clonedRamo = document.createElement('div');
+                            clonedRamo.textContent = ramoElement.textContent.trim(); // Get only text content
+                            clonedRamo.style.margin = '6px 0';
+                            clonedRamo.style.padding = '8px 10px';
+                            clonedRamo.style.borderRadius = '4px';
+                            clonedRamo.style.fontSize = '0.95em';
+                            clonedRamo.style.display = 'flex';
+                            clonedRamo.style.alignItems = 'center';
+                            clonedRamo.style.color = textColor;
+                            clonedRamo.style.boxSizing = 'border-box';
+
+                            // Add dot based on area
+                            const area = ramoElement.dataset.area;
+                            clonedRamo.prepend(createDot(area));
+
+                            // Apply colors based on approval status
+                            const code = ramoElement.dataset.code;
+                            if (aprobados.has(code)) {
+                                clonedRamo.style.backgroundColor = ramoAprobadoBgColor;
+                                clonedRamo.style.borderLeft = `4px solid ${greenColor}`;
+                            } else {
+                                clonedRamo.style.backgroundColor = ramoBgColor;
+                                clonedRamo.style.borderLeft = '4px solid transparent';
+                            }
+                            semesterDiv.appendChild(clonedRamo);
+                        });
+                    }
+                    semestersRow.appendChild(semesterDiv);
+                }
+                tempMallaContainer.appendChild(yearDiv);
+            }
+
+            document.body.appendChild(tempMallaContainer);
+
+            // 3. Capture the hidden div
+            const canvas = await html2canvas(tempMallaContainer, {
+                scale: 2, // High resolution for better quality
+                useCORS: true,
+                backgroundColor: null // Allow background to be transparent or inherit
+            });
+
+            // 4. Create final 16:9 canvas and combine content
+            const targetAspectRatio = 16 / 9;
+            const baseWidth = 1920; // Target HD width for the final image
+            const baseHeight = baseWidth / targetAspectRatio;
+
             const finalCanvas = document.createElement('canvas');
             const context = finalCanvas.getContext('2d');
 
-            // Calcular dimensiones para el canvas final
-            const padding = 30; // Relleno alrededor de la imagen
-            const headerHeight = 80; // Altura para el encabezado de la imagen (título, créditos, tema, fecha)
-            finalCanvas.width = canvas.width + padding * 2;
-            finalCanvas.height = canvas.height + headerHeight + padding * 2;
+            finalCanvas.width = baseWidth;
+            finalCanvas.height = baseHeight;
 
-            // Obtener el color de fondo del body para el canvas final
-            const bodyStyle = getComputedStyle(document.body);
-            const bgColor = bodyStyle.getPropertyValue('--bg');
-            context.fillStyle = bgColor;
+            // Fill background of the final canvas
+            context.fillStyle = bodyStyle.getPropertyValue('--bg');
             context.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
 
-            const logoImg = document.querySelector('#header-left img');
-            let logoOffset = 0; // Offset for text if logo is drawn
+            const headerPadding = 40; // More padding for header
+            const headerHeight = 120; // Increased header height to accommodate more info
 
-            // Check if logo is loaded before drawing
+            // Draw Header Content
+            const logoImg = document.querySelector('#main-header #header-left img');
+            let logoOffset = 0;
             if (logoImg && logoImg.complete && logoImg.naturalWidth > 0) {
-                const logoSize = 60; // Tamaño del logo en el canvas exportado
-                const logoX = padding;
-                const logoY = padding + (headerHeight - logoSize) / 2 - 10; // Centrar verticalmente en el área del encabezado
+                const logoSize = 70; // Larger logo for export
+                const logoX = headerPadding;
+                const logoY = headerPadding + (headerHeight - logoSize) / 2 - 10;
                 context.drawImage(logoImg, logoX, logoY, logoSize, logoSize);
-                logoOffset = logoSize + 15; // Add offset for text
-            } else {
-                console.warn('Logo image not loaded or found. Skipping drawing logo on exported image.');
-                // Optionally, draw a placeholder or just skip the logo
+                logoOffset = logoSize + 20;
             }
 
-            // Dibujar el título de la malla
-            context.font = 'bold 30px "Playfair Display", serif';
-            context.fillStyle = bodyStyle.getPropertyValue('--accent');
+            // Malla Title
+            context.font = 'bold 36px "Playfair Display", serif';
+            context.fillStyle = accentColor;
             context.textAlign = 'left';
-            context.fillText('Malla Interactiva Química y Farmacia', padding + logoOffset, padding + 30);
+            context.fillText('Malla Curricular Química y Farmacia', headerPadding + logoOffset, headerPadding + 40);
 
-            // Dibujar los créditos totales
-            context.font = '22px "Inter", sans-serif';
-            context.fillStyle = bodyStyle.getPropertyValue('--text');
-            context.textAlign = 'left';
-            context.fillText(totalCreditsText, padding + logoOffset, padding + 60);
+            // University Name
+            context.font = '24px "Inter", sans-serif';
+            context.fillStyle = textColor;
+            context.fillText('Universidad Adventista de Chile', headerPadding + logoOffset, headerPadding + 75);
 
-            // Dibujar la información del tema y la fecha/hora
-            context.font = '18px "Inter", sans-serif';
-            context.fillStyle = bodyStyle.getPropertyValue('--text');
+            // Credits and Theme/Date on the right
+            context.font = '20px "Inter", sans-serif';
             context.textAlign = 'right';
-            context.fillText(`Tema: ${currentThemeDisplay}`, finalCanvas.width - padding, padding + 30);
-            context.fillText(`Fecha: ${currentDateTime}`, finalCanvas.width - padding, padding + 60);
+            context.fillText(totalCreditsText, finalCanvas.width - headerPadding, headerPadding + 40);
+            context.fillText(`Tema: ${currentThemeDisplay}`, finalCanvas.width - headerPadding, headerPadding + 70);
+            context.fillText(`Fecha: ${currentDateTime}`, finalCanvas.width - headerPadding, headerPadding + 100);
 
-            // Dibujar la malla capturada
-            context.drawImage(canvas, padding, headerHeight + padding);
+            // Draw the captured malla (scaled to fit)
+            const mallaX = headerPadding;
+            const mallaY = headerHeight + headerPadding;
+            const mallaWidth = finalCanvas.width - (headerPadding * 2);
+            const mallaHeight = finalCanvas.height - headerHeight - (headerPadding * 2) - 20; // Leave some space at bottom
 
-            // Crear un enlace de descarga
+            const scaleX = mallaWidth / canvas.width;
+            const scaleY = mallaHeight / canvas.height;
+            const scale = Math.min(scaleX, scaleY);
+
+            const scaledWidth = canvas.width * scale;
+            const scaledHeight = canvas.height * scale;
+
+            const centeredMallaX = mallaX + (mallaWidth - scaledWidth) / 2;
+            const centeredMallaY = mallaY + (mallaHeight - scaledHeight) / 2;
+
+            context.drawImage(canvas, centeredMallaX, centeredMallaY, scaledWidth, scaledHeight);
+
+            // 5. Create download link
             const image = finalCanvas.toDataURL('image/png');
             const a = document.createElement('a');
             a.href = image;
-            a.download = `malla_unach_qyf_progreso_${themeName}_${new Date().toISOString().slice(0,10)}.png`; // Nombre de archivo dinámico
+            a.download = `malla_unach_qyf_progreso_${themeName}_${new Date().toISOString().slice(0,10)}.png`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -1980,11 +2134,16 @@
             console.error('Error al exportar la imagen:', error);
             alert('Hubo un error al exportar la imagen. Inténtalo de nuevo. Asegúrate de que el logo.png esté en la misma carpeta y sea accesible.');
         } finally {
+            // Remove the temporary malla container
+            if (tempMallaContainer && tempMallaContainer.parentNode) {
+                tempMallaContainer.parentNode.removeChild(tempMallaContainer);
+            }
             // Restore button state
             exportImageBtn.textContent = originalButtonText;
             exportImageBtn.disabled = false;
         }
     });
+
 
     // Calendar logic
     const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
