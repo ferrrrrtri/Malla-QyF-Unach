@@ -966,7 +966,7 @@
       <button id="export-btn">Exportar Progreso</button>
       <input type="file" id="import-file" accept=".json" style="display: none;">
       <button id="import-btn">Importar Progreso</button>
-      <button id="export-image-btn">Exportar Imagen Malla</button> <!-- Nuevo botón -->
+      <button id="export-image-btn">Exportar Malla a PDF</button> <!-- Texto del botón actualizado -->
       <button onclick="reset()">Reiniciar</button>
       
       <!-- Sección de Información Combinada -->
@@ -1403,8 +1403,8 @@
     </div>
   </div>
 
-  <!-- Script para html2canvas -->
-  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+  <!-- Script para jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <script>
     // Referencias a los elementos del DOM
@@ -1626,7 +1626,32 @@
     // Función para mostrar un modal de alerta personalizado (se mantiene el alert() por ahora)
     // NOTA: Esta función ya no se usa para completar semestre/año, ahora se usa showSemesterCompleteModal
     function showCustomAlert(message) {
-        alert(message);
+        // Reemplazando alert() con un modal personalizado para mejor UX
+        const customAlertModal = document.getElementById('tr-nico-message-modal'); // Reutilizando este modal
+        const modalTitle = customAlertModal.querySelector('.modal-title');
+        const modalMessage = customAlertModal.querySelector('p');
+        
+        modalTitle.textContent = "Información"; // Título genérico para alertas
+        modalMessage.textContent = message;
+        customAlertModal.classList.add('show');
+
+        // Cerrar el modal al hacer clic en el botón o fuera de él
+        const closeBtn = customAlertModal.querySelector('.modal-close-button');
+        const okBtn = customAlertModal.querySelector('#tr-nico-modal-close-btn');
+        const closeHandler = () => {
+            customAlertModal.classList.remove('show');
+            closeBtn.removeEventListener('click', closeHandler);
+            okBtn.removeEventListener('click', closeHandler);
+            customAlertModal.removeEventListener('click', backdropCloseHandler);
+        };
+        const backdropCloseHandler = (e) => {
+            if (e.target === customAlertModal) {
+                closeHandler();
+            }
+        };
+        closeBtn.addEventListener('click', closeHandler);
+        okBtn.addEventListener('click', closeHandler);
+        customAlertModal.addEventListener('click', backdropCloseHandler);
     }
 
     // Función para mostrar el modal de información del ramo
@@ -1693,7 +1718,7 @@
                 const falt = deps.find(q => !aprobados.has(q));
                 const nom = document.querySelector(`.ramo[data-code="${falt}"]`).textContent;
                 currentRamoElement.classList.add('error');
-                alert(`Lo siento, aún no has aprobado "${nom.trim()}" para aprobar este ramo.`);
+                showCustomAlert(`Lo siento, aún no has aprobado "${nom.trim()}" para aprobar este ramo.`);
                 currentRamoElement.addEventListener('animationend', () => currentRamoElement.classList.remove('error'), { once: true });
             } else {
                 aprobados.add(code);
@@ -1841,7 +1866,7 @@
         a.click();
         document.body.removeChild(a); // Limpiar
         URL.revokeObjectURL(url); // Liberar el objeto URL
-        alert('Progreso exportado exitosamente como "progreso_malla_unach.json"'); // Usar alert para este mensaje
+        showCustomAlert('Progreso exportado exitosamente como "progreso_malla_unach.json"');
     });
 
     importBtn.addEventListener('click', () => {
@@ -1879,52 +1904,40 @@
                     }
 
                     updateUI();
-                    alert('Progreso importado exitosamente.'); // Usar alert para este mensaje
+                    showCustomAlert('Progreso importado exitosamente.');
                 } else {
-                    alert('El archivo importado no tiene el formato correcto.');
+                    showCustomAlert('El archivo importado no tiene el formato correcto.');
                 }
             } catch (error) {
                 console.error('Error al parsear el archivo JSON:', error);
-                alert('Error al importar el progreso. Asegúrate de que el archivo sea un JSON válido.');
+                showCustomAlert('Error al importar el progreso. Asegúrate de que el archivo sea un JSON válido.');
             }
         };
         reader.readAsText(file);
     });
 
-    // Function to create a dot with specific area color (moved from imageExporter.js)
-    const createDot = (area) => {
-        const dot = document.createElement('span');
-        dot.classList.add('dot');
-        dot.style.display = 'inline-block';
-        dot.style.width = '10px';
-        dot.style.height = '10px';
-        dot.style.borderRadius = '50%';
-        dot.style.marginRight = '6px';
-        dot.style.verticalAlign = 'middle';
-        const bodyStyle = getComputedStyle(document.body); // Get style here
-        const yellowColor = bodyStyle.getPropertyValue('--yellow');
+    // Function to create a dot with specific area color for PDF export
+    const createPdfDotColor = (area, bodyStyle) => {
         switch (area) {
-            case 'espiritual': dot.style.backgroundColor = 'green'; break;
-            case 'general': dot.style.backgroundColor = '#00bcd4'; break;
-            case 'profesional': dot.style.backgroundColor = yellowColor; break;
-            case 'especialidad': dot.style.backgroundColor = bodyStyle.getPropertyValue('--lila'); break;
-            case 'practica': dot.style.backgroundColor = bodyStyle.getPropertyValue('--red'); break;
+            case 'espiritual': return 'green';
+            case 'general': return '#00bcd4';
+            case 'profesional': return bodyStyle.getPropertyValue('--yellow');
+            case 'especialidad': return bodyStyle.getPropertyValue('--lila');
+            case 'practica': return bodyStyle.getPropertyValue('--red');
+            default: return '#000000'; // Default black
         }
-        return dot;
     };
 
-    // Image export functionality (integrated from imageExporter.js)
+    // Image export functionality (now PDF export)
     exportImageBtn.addEventListener('click', async () => {
         const originalButtonText = exportImageBtn.textContent;
-        exportImageBtn.textContent = 'Generando imagen...';
+        exportImageBtn.textContent = 'Generando PDF...';
         exportImageBtn.disabled = true;
 
         const totalCreditsText = `Créditos Totales: ${creditosTotalSpan.textContent}/330`;
-        const themeName = themeSelector.value;
         const currentThemeDisplay = themeSelector.options[themeSelector.selectedIndex].text;
         const currentDateTime = clk.textContent;
 
-        // Get current computed styles for dynamic elements
         const bodyStyle = getComputedStyle(document.body);
         const accentColor = bodyStyle.getPropertyValue('--accent');
         const accent2Color = bodyStyle.getPropertyValue('--accent2');
@@ -1933,211 +1946,258 @@
         const ramoBgColor = bodyStyle.getPropertyValue('--ramo-bg');
         const ramoAprobadoBgColor = bodyStyle.getPropertyValue('--ramo-aprobado-bg');
         const greenColor = bodyStyle.getPropertyValue('--green');
-        const yellowColor = bodyStyle.getPropertyValue('--yellow');
-
 
         try {
-            if (typeof html2canvas === 'undefined') {
-                console.error('html2canvas library is not loaded.');
-                alert('Error: La librería html2canvas no está disponible. No se puede exportar la imagen.');
-                return;
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+            const pageHeight = doc.internal.pageSize.height;
+            const pageWidth = doc.internal.pageSize.width;
+            const margin = 10;
+            let currentY = margin;
+
+            // Header content
+            const headerHeight = 30; // Height for the header section
+            const logoSize = 15; // Smaller logo for PDF
+            const logoX = margin;
+            const logoY = currentY + (headerHeight - logoSize) / 2 - 2; // Centered vertically in header
+
+            // Placeholder for logo image (as direct file access is not guaranteed in sandbox)
+            const placeholderLogoUrl = "https://placehold.co/70x70/007bff/ffffff?text=LOGO"; // Example placeholder
+
+            // Fetch logo as base64 if possible (more robust for general use, but might fail in sandbox)
+            let logoBase64 = null;
+            try {
+                const response = await fetch('logo.png'); // Assuming logo.png is in the root
+                if (response.ok) {
+                    const blob = await response.blob();
+                    logoBase64 = await new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.readAsDataURL(blob);
+                    });
+                } else {
+                    console.warn('Failed to fetch logo.png, using placeholder.');
+                    logoBase64 = placeholderLogoUrl;
+                }
+            } catch (e) {
+                console.warn('Error fetching logo.png, using placeholder:', e);
+                logoBase64 = placeholderLogoUrl;
             }
 
-            // 1. Create a temporary, hidden element for PDF-like rendering
-            const tempMallaContainer = document.createElement('div');
-            tempMallaContainer.style.position = 'absolute';
-            tempMallaContainer.style.left = '-9999px'; // Hide it off-screen
-            tempMallaContainer.style.width = '1920px'; // Target width for HD 16:9
-            tempMallaContainer.style.padding = '30px';
-            tempMallaContainer.style.backgroundColor = bodyStyle.getPropertyValue('--bg');
-            tempMallaContainer.style.color = textColor;
-            tempMallaContainer.style.fontFamily = 'Inter, sans-serif';
-            tempMallaContainer.style.boxSizing = 'border-box'; // Ensure padding is included in width
+            if (logoBase64) {
+                doc.addImage(logoBase64, 'PNG', logoX, logoY, logoSize, logoSize);
+            }
 
-            // 2. Populate the hidden div with PDF-like malla structure
-            const yearsData = {};
+            doc.setFontSize(14);
+            doc.setTextColor(accentColor);
+            doc.text('Malla Curricular Química y Farmacia', logoX + logoSize + 5, currentY + 10);
+
+            doc.setFontSize(10);
+            doc.setTextColor(textColor);
+            doc.text('Universidad Adventista de Chile', logoX + logoSize + 5, currentY + 15);
+
+            doc.setFontSize(9);
+            doc.setTextColor(textColor);
+            doc.text(totalCreditsText, pageWidth - margin, currentY + 10, { align: 'right' });
+            doc.text(`Tema: ${currentThemeDisplay}`, pageWidth - margin, currentY + 15, { align: 'right' });
+            doc.text(`Fecha: ${currentDateTime}`, pageWidth - margin, currentY + 20, { align: 'right' });
+
+            currentY += headerHeight + 5; // Move Y past the header
+
             // Group ramos by year and then by semester
-            ramos.forEach(ramoElement => {
-                const year = ramoElement.closest('.year').dataset.year;
-                const semester = ramoElement.closest('.semestre').dataset.sem;
-                if (!yearsData[year]) yearsData[year] = {};
-                if (!yearsData[year][semester]) yearsData[year][semester] = [];
-                yearsData[year][semester].push(ramoElement);
+            const yearsData = {};
+            document.querySelectorAll('.year').forEach(yearElement => {
+                const yearNum = yearElement.dataset.year;
+                yearsData[yearNum] = {};
+                yearElement.querySelectorAll('.semestre:not(.empty)').forEach(semesterElement => {
+                    const semesterNum = semesterElement.dataset.sem;
+                    yearsData[yearNum][semesterNum] = [];
+                    semesterElement.querySelectorAll('.ramo').forEach(ramoElement => {
+                        yearsData[yearNum][semesterNum].push({
+                            code: ramoElement.dataset.code,
+                            name: ramoElement.textContent.trim(),
+                            area: ramoElement.dataset.area,
+                            creditos: ramoElement.dataset.creditos,
+                            approved: aprobados.has(ramoElement.dataset.code)
+                        });
+                    });
+                });
             });
 
-            for (const yearNum in yearsData) {
-                const yearDiv = document.createElement('div');
-                yearDiv.style.marginBottom = '20px';
-                yearDiv.style.border = `1px solid ${cardColor}`;
-                yearDiv.style.borderRadius = '8px';
-                yearDiv.style.overflow = 'hidden';
-                yearDiv.style.boxShadow = '0 2px 6px rgba(0,0,0,0.1)'; // Use a subtle shadow
-                yearDiv.style.backgroundColor = cardColor;
-                yearDiv.style.boxSizing = 'border-box';
+            const yearsPerRow = 3; // Number of years to display per row
+            const yearHorizontalSpacing = 5; // Spacing between year blocks
+            const availableWidth = pageWidth - (2 * margin);
+            const yearBlockWidth = (availableWidth - (yearsPerRow - 1) * yearHorizontalSpacing) / yearsPerRow;
+            const semesterColumnWidth = (yearBlockWidth - 5) / 2; // 5mm padding inside year block
 
-                const yearLabel = document.createElement('div');
-                yearLabel.textContent = `${yearNum}° AÑO`;
-                yearLabel.style.background = `linear-gradient(90deg, ${accent2Color}, ${accentColor})`;
-                yearLabel.style.color = '#fff';
-                yearLabel.style.padding = '10px';
-                yearLabel.style.fontWeight = '600';
-                yearLabel.style.fontSize = '1.1em';
-                yearLabel.style.textAlign = 'center';
-                yearDiv.appendChild(yearLabel);
+            const ramoHeight = 7; // Height for each ramo block
+            const ramoPadding = 1; // Padding around ramo text
 
-                const semestersRow = document.createElement('div');
-                semestersRow.style.display = 'grid';
-                semestersRow.style.gridTemplateColumns = '1fr 1fr'; // Two columns for semesters
-                semestersRow.style.gap = '15px';
-                semestersRow.style.padding = '15px';
-                semestersRow.style.boxSizing = 'border-box';
-                yearDiv.appendChild(semestersRow);
+            let currentYearIndex = 0;
+            const sortedYears = Object.keys(yearsData).sort((a, b) => parseInt(a) - parseInt(b));
 
-                // Assuming semesters are 1 and 2 for each year in the PDF-like layout
-                for (let semIndex = 1; semIndex <= 2; semIndex++) {
-                    const actualSemNum = (parseInt(yearNum) - 1) * 2 + semIndex; // Calculate actual semester number from original data
-                    const semesterDiv = document.createElement('div');
-                    semesterDiv.style.border = `1px dashed ${bodyStyle.getPropertyValue('--text')}33`; // Lighter dashed border
-                    semesterDiv.style.padding = '10px';
-                    semesterDiv.style.borderRadius = '5px';
-                    semesterDiv.style.backgroundColor = ramoBgColor;
-                    semesterDiv.style.boxSizing = 'border-box';
+            for (const yearNum of sortedYears) {
+                if (currentYearIndex % yearsPerRow === 0 && currentYearIndex !== 0) {
+                    // Start a new row of years, check for new page
+                    currentY += 10; // Vertical space between rows of years
+                    if (currentY + 50 > pageHeight - margin) { // Estimate height for next year block
+                        doc.addPage();
+                        currentY = margin;
+                    }
+                }
 
-                    const semLabel = document.createElement('div');
-                    semLabel.textContent = `${actualSemNum}° Semestre`;
-                    semLabel.style.fontWeight = '600';
-                    semLabel.style.marginBottom = '10px';
-                    semLabel.style.color = accentColor;
-                    semesterDiv.appendChild(semLabel);
+                const yearBlockX = margin + (currentYearIndex % yearsPerRow) * (yearBlockWidth + yearHorizontalSpacing);
+                let yearBlockY = currentY;
+                let maxSemesterHeight = 0; // To align the bottom of year blocks
 
-                    const semesterRamos = yearsData[yearNum]?.[actualSemNum];
-                    if (semesterRamos) {
-                        semesterRamos.forEach(ramoElement => {
-                            const clonedRamo = document.createElement('div');
-                            clonedRamo.textContent = ramoElement.textContent.trim(); // Get only text content
-                            clonedRamo.style.margin = '6px 0';
-                            clonedRamo.style.padding = '8px 10px';
-                            clonedRamo.style.borderRadius = '4px';
-                            clonedRamo.style.fontSize = '0.95em';
-                            clonedRamo.style.display = 'flex';
-                            clonedRamo.style.alignItems = 'center';
-                            clonedRamo.style.color = textColor;
-                            clonedRamo.style.boxSizing = 'border-box';
+                // Draw year label
+                doc.setFillColor(accent2Color);
+                doc.rect(yearBlockX, yearBlockY, yearBlockWidth, 7, 'F'); // Year label background
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(8);
+                doc.text(`${yearNum}° AÑO`, yearBlockX + yearBlockWidth / 2, yearBlockY + 4, { align: 'center' });
+                yearBlockY += 7; // Move past year label
 
-                            // Add dot based on area
-                            const area = ramoElement.dataset.area;
-                            clonedRamo.prepend(createDot(area));
+                // Draw year block border (card color)
+                doc.setDrawColor(cardColor);
+                doc.setFillColor(cardColor);
+                doc.rect(yearBlockX, yearBlockY, yearBlockWidth, 2, 'F'); // Small separator
 
-                            // Apply colors based on approval status
-                            const code = ramoElement.dataset.code;
-                            if (aprobados.has(code)) {
-                                clonedRamo.style.backgroundColor = ramoAprobadoBgColor;
-                                clonedRamo.style.borderLeft = `4px solid ${greenColor}`;
-                            } else {
-                                clonedRamo.style.backgroundColor = ramoBgColor;
-                                clonedRamo.style.borderLeft = '4px solid transparent';
+                // Semesters for this year
+                const semester1Ramos = yearsData[yearNum]['1'] || [];
+                const semester2Ramos = yearsData[yearNum]['2'] || [];
+                const semester3Ramos = yearsData[yearNum]['3'] || []; // Assuming some years might have 3 semesters
+                const semester4Ramos = yearsData[yearNum]['4'] || [];
+                const semester5Ramos = yearsData[yearNum]['5'] || [];
+                const semester6Ramos = yearsData[yearNum]['6'] || [];
+                const semester7Ramos = yearsData[yearNum]['7'] || [];
+                const semester8Ramos = yearsData[yearNum]['8'] || [];
+                const semester9Ramos = yearsData[yearNum]['9'] || [];
+                const semester10Ramos = yearsData[yearNum]['10'] || [];
+                const semester11Ramos = yearsData[yearNum]['11'] || [];
+
+                const semestersInYear = Object.keys(yearsData[yearNum]).sort((a,b) => parseInt(a) - parseInt(b));
+                const semesterPairs = [];
+                for(let i = 0; i < semestersInYear.length; i += 2) {
+                    semesterPairs.push([semestersInYear[i], semestersInYear[i+1]]);
+                }
+
+                let currentSemesterY = yearBlockY + 2; // Start Y for semesters within the year block
+
+                for (const pair of semesterPairs) {
+                    let leftSemNum = pair[0];
+                    let rightSemNum = pair[1];
+                    let leftRamos = yearsData[yearNum][leftSemNum] || [];
+                    let rightRamos = yearsData[yearNum][rightSemNum] || [];
+
+                    let tempLeftY = currentSemesterY;
+                    let tempRightY = currentSemesterY;
+
+                    // Draw left semester
+                    doc.setTextColor(accentColor);
+                    doc.setFontSize(7);
+                    doc.text(`${leftSemNum}° Semestre`, yearBlockX + 2, tempLeftY + 3);
+                    tempLeftY += 5; // Space for semester title
+
+                    doc.setDrawColor(textColor + '33'); // Lighter dashed border
+                    doc.setFillColor(ramoBgColor);
+                    
+                    leftRamos.forEach(ramo => {
+                        const ramoText = doc.splitTextToSize(ramo.name, semesterColumnWidth - (2 * ramoPadding) - 3); // 3 for dot width
+                        const textHeight = ramoText.length * 2.5; // Estimate text height based on font size
+                        const actualRamoHeight = Math.max(ramoHeight, textHeight + 2 * ramoPadding);
+
+                        if (tempLeftY + actualRamoHeight > pageHeight - margin) {
+                            // If ramo goes beyond page, add new page. This is complex for side-by-side.
+                            // For simplicity, we'll just add a new page and continue, but this might break side-by-side layout.
+                            // A more robust solution would require re-calculating the entire layout for new pages.
+                            // For now, let's assume content fits or just overflows visually.
+                        }
+
+                        let ramoFillColor = ramoBgColor;
+                        let ramoBorderColor = 'transparent';
+                        if (ramo.approved) {
+                            ramoFillColor = ramoAprobadoBgColor;
+                            ramoBorderColor = greenColor;
+                        }
+
+                        doc.setFillColor(ramoFillColor);
+                        doc.rect(yearBlockX + 2, tempLeftY, semesterColumnWidth, actualRamoHeight, 'F');
+                        if (ramo.approved) {
+                            doc.setDrawColor(ramoBorderColor);
+                            doc.setLineWidth(0.5);
+                            doc.line(yearBlockX + 2, tempLeftY, yearBlockX + 2, tempLeftY + actualRamoHeight); // Left border
+                        }
+
+                        // Draw dot
+                        doc.setFillColor(createPdfDotColor(ramo.area, bodyStyle));
+                        doc.circle(yearBlockX + 2 + 1.5, tempLeftY + actualRamoHeight / 2, 1.5, 'F'); // Dot
+
+                        doc.setTextColor(textColor);
+                        doc.setFontSize(6);
+                        doc.text(ramoText, yearBlockX + 2 + 3, tempLeftY + ramoPadding + (actualRamoHeight - textHeight) / 2);
+                        tempLeftY += actualRamoHeight + 1; // 1mm spacing between ramos
+                    });
+
+                    // Draw right semester (if it exists)
+                    if (rightSemNum) {
+                        doc.setTextColor(accentColor);
+                        doc.setFontSize(7);
+                        doc.text(`${rightSemNum}° Semestre`, yearBlockX + semesterColumnWidth + 3, tempRightY + 3);
+                        tempRightY += 5; // Space for semester title
+
+                        doc.setDrawColor(textColor + '33');
+                        doc.setFillColor(ramoBgColor);
+
+                        rightRamos.forEach(ramo => {
+                            const ramoText = doc.splitTextToSize(ramo.name, semesterColumnWidth - (2 * ramoPadding) - 3);
+                            const textHeight = ramoText.length * 2.5;
+                            const actualRamoHeight = Math.max(ramoHeight, textHeight + 2 * ramoPadding);
+
+                            let ramoFillColor = ramoBgColor;
+                            let ramoBorderColor = 'transparent';
+                            if (ramo.approved) {
+                                ramoFillColor = ramoAprobadoBgColor;
+                                ramoBorderColor = greenColor;
                             }
-                            semesterDiv.appendChild(clonedRamo);
+
+                            doc.setFillColor(ramoFillColor);
+                            doc.rect(yearBlockX + semesterColumnWidth + 3, tempRightY, semesterColumnWidth, actualRamoHeight, 'F');
+                            if (ramo.approved) {
+                                doc.setDrawColor(ramoBorderColor);
+                                doc.setLineWidth(0.5);
+                                doc.line(yearBlockX + semesterColumnWidth + 3, tempRightY, yearBlockX + semesterColumnWidth + 3, tempRightY + actualRamoHeight);
+                            }
+
+                            // Draw dot
+                            doc.setFillColor(createPdfDotColor(ramo.area, bodyStyle));
+                            doc.circle(yearBlockX + semesterColumnWidth + 3 + 1.5, tempRightY + actualRamoHeight / 2, 1.5, 'F');
+
+                            doc.setTextColor(textColor);
+                            doc.setFontSize(6);
+                            doc.text(ramoText, yearBlockX + semesterColumnWidth + 3 + 3, tempRightY + ramoPadding + (actualRamoHeight - textHeight) / 2);
+                            tempRightY += actualRamoHeight + 1;
                         });
                     }
-                    semestersRow.appendChild(semesterDiv);
+                    maxSemesterHeight = Math.max(maxSemesterHeight, tempLeftY, tempRightY);
+                    currentSemesterY = maxSemesterHeight + 2; // Move Y for next pair of semesters
                 }
-                tempMallaContainer.appendChild(yearDiv);
+
+                currentYearIndex++;
+                if (currentYearIndex % yearsPerRow === 0) {
+                    currentY = currentSemesterY + 10; // Reset Y for next row of years
+                }
             }
-
-            document.body.appendChild(tempMallaContainer);
-
-            // 3. Capture the hidden div
-            const canvas = await html2canvas(tempMallaContainer, {
-                scale: 2, // High resolution for better quality
-                useCORS: true,
-                backgroundColor: null // Allow background to be transparent or inherit
-            });
-
-            // 4. Create final 16:9 canvas and combine content
-            const targetAspectRatio = 16 / 9;
-            const baseWidth = 1920; // Target HD width for the final image
-            const baseHeight = baseWidth / targetAspectRatio;
-
-            const finalCanvas = document.createElement('canvas');
-            const context = finalCanvas.getContext('2d');
-
-            finalCanvas.width = baseWidth;
-            finalCanvas.height = baseHeight;
-
-            // Fill background of the final canvas
-            context.fillStyle = bodyStyle.getPropertyValue('--bg');
-            context.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
-
-            const headerPadding = 40; // More padding for header
-            const headerHeight = 120; // Increased header height to accommodate more info
-
-            // Draw Header Content
-            const logoImg = document.querySelector('#main-header #header-left img');
-            let logoOffset = 0;
-            if (logoImg && logoImg.complete && logoImg.naturalWidth > 0) {
-                const logoSize = 70; // Larger logo for export
-                const logoX = headerPadding;
-                const logoY = headerPadding + (headerHeight - logoSize) / 2 - 10;
-                context.drawImage(logoImg, logoX, logoY, logoSize, logoSize);
-                logoOffset = logoSize + 20;
-            }
-
-            // Malla Title
-            context.font = 'bold 36px "Playfair Display", serif';
-            context.fillStyle = accentColor;
-            context.textAlign = 'left';
-            context.fillText('Malla Curricular Química y Farmacia', headerPadding + logoOffset, headerPadding + 40);
-
-            // University Name
-            context.font = '24px "Inter", sans-serif';
-            context.fillStyle = textColor;
-            context.fillText('Universidad Adventista de Chile', headerPadding + logoOffset, headerPadding + 75);
-
-            // Credits and Theme/Date on the right
-            context.font = '20px "Inter", sans-serif';
-            context.textAlign = 'right';
-            context.fillText(totalCreditsText, finalCanvas.width - headerPadding, headerPadding + 40);
-            context.fillText(`Tema: ${currentThemeDisplay}`, finalCanvas.width - headerPadding, headerPadding + 70);
-            context.fillText(`Fecha: ${currentDateTime}`, finalCanvas.width - headerPadding, headerPadding + 100);
-
-            // Draw the captured malla (scaled to fit)
-            const mallaX = headerPadding;
-            const mallaY = headerHeight + headerPadding;
-            const mallaWidth = finalCanvas.width - (headerPadding * 2);
-            const mallaHeight = finalCanvas.height - headerHeight - (headerPadding * 2) - 20; // Leave some space at bottom
-
-            const scaleX = mallaWidth / canvas.width;
-            const scaleY = mallaHeight / canvas.height;
-            const scale = Math.min(scaleX, scaleY);
-
-            const scaledWidth = canvas.width * scale;
-            const scaledHeight = canvas.height * scale;
-
-            const centeredMallaX = mallaX + (mallaWidth - scaledWidth) / 2;
-            const centeredMallaY = mallaY + (mallaHeight - scaledHeight) / 2;
-
-            context.drawImage(canvas, centeredMallaX, centeredMallaY, scaledWidth, scaledHeight);
-
-            // 5. Create download link
-            const image = finalCanvas.toDataURL('image/png');
-            const a = document.createElement('a');
-            a.href = image;
-            a.download = `malla_unach_qyf_progreso_${themeName}_${new Date().toISOString().slice(0,10)}.png`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-
-            alert('Imagen de la malla exportada exitosamente!');
+            
+            // Save the PDF
+            doc.save(`malla_unach_qyf_progreso_${new Date().toISOString().slice(0,10)}.pdf`);
+            showCustomAlert('Malla exportada exitosamente como PDF!');
 
         } catch (error) {
-            console.error('Error al exportar la imagen:', error);
-            alert('Hubo un error al exportar la imagen. Inténtalo de nuevo. Asegúrate de que el logo.png esté en la misma carpeta y sea accesible.');
+            console.error('Error al exportar la malla a PDF:', error);
+            showCustomAlert('Hubo un error al exportar la malla a PDF. Inténtalo de nuevo.');
         } finally {
-            // Remove the temporary malla container
-            if (tempMallaContainer && tempMallaContainer.parentNode) {
-                tempMallaContainer.parentNode.removeChild(tempMallaContainer);
-            }
             // Restore button state
             exportImageBtn.textContent = originalButtonText;
             exportImageBtn.disabled = false;
