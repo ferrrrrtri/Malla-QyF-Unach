@@ -1986,17 +1986,27 @@
             }
 
             if (logoBase64) {
-                doc.addImage(logoBase64, 'PNG', logoX, logoY, logoSize, logoSize);
+                // Original logo dimensions: 1095 x 288 pixels
+                // Aspect ratio: 1095 / 288 = 3.795
+                const originalLogoWidth = 1095;
+                const originalLogoHeight = 288;
+                const targetLogoHeight = 15; // Keep height consistent with other elements
+                const targetLogoWidth = (originalLogoWidth / originalLogoHeight) * targetLogoHeight;
+
+                doc.addImage(logoBase64, 'PNG', logoX, logoY, targetLogoWidth, targetLogoHeight);
             }
 
-            doc.setFontSize(14);
+            // Malla Title (Centered and larger)
+            doc.setFontSize(18); // Increased font size for main title
             doc.setTextColor(accentColor);
-            doc.text('Malla Curricular Química y Farmacia', logoX + logoSize + 5, currentY + 10);
+            doc.text('Malla Curricular Química y Farmacia', pageWidth / 2, currentY + 10, { align: 'center' });
 
-            doc.setFontSize(10);
+            // University Name (below title)
+            doc.setFontSize(12);
             doc.setTextColor(textColor);
-            doc.text('Universidad Adventista de Chile', logoX + logoSize + 5, currentY + 15);
+            doc.text('Universidad Adventista de Chile', pageWidth / 2, currentY + 16, { align: 'center' });
 
+            // Credits and Theme/Date on the right
             doc.setFontSize(9);
             doc.setTextColor(textColor);
             doc.text(totalCreditsText, pageWidth - margin, currentY + 10, { align: 'right' });
@@ -2031,6 +2041,8 @@
             const yearBlockWidth = (availableWidth - (yearsPerRow - 1) * yearHorizontalSpacing) / yearsPerRow;
             const semesterColumnWidth = (yearBlockWidth - 5) / 2; // 5mm padding inside year block
 
+            const ramoTextSize = 6; // Smaller font for ramos
+            const ramoDotSize = 0.8; // Smaller dot size
             const ramoHeight = 7; // Height for each ramo block
             const ramoPadding = 1; // Padding around ramo text
 
@@ -2065,18 +2077,6 @@
                 doc.rect(yearBlockX, yearBlockY, yearBlockWidth, 2, 'F'); // Small separator
 
                 // Semesters for this year
-                const semester1Ramos = yearsData[yearNum]['1'] || [];
-                const semester2Ramos = yearsData[yearNum]['2'] || [];
-                const semester3Ramos = yearsData[yearNum]['3'] || []; // Assuming some years might have 3 semesters
-                const semester4Ramos = yearsData[yearNum]['4'] || [];
-                const semester5Ramos = yearsData[yearNum]['5'] || [];
-                const semester6Ramos = yearsData[yearNum]['6'] || [];
-                const semester7Ramos = yearsData[yearNum]['7'] || [];
-                const semester8Ramos = yearsData[yearNum]['8'] || [];
-                const semester9Ramos = yearsData[yearNum]['9'] || [];
-                const semester10Ramos = yearsData[yearNum]['10'] || [];
-                const semester11Ramos = yearsData[yearNum]['11'] || [];
-
                 const semestersInYear = Object.keys(yearsData[yearNum]).sort((a,b) => parseInt(a) - parseInt(b));
                 const semesterPairs = [];
                 for(let i = 0; i < semestersInYear.length; i += 2) {
@@ -2130,13 +2130,14 @@
                             doc.line(yearBlockX + 2, tempLeftY, yearBlockX + 2, tempLeftY + actualRamoHeight); // Left border
                         }
 
-                        // Draw dot
-                        doc.setFillColor(createPdfDotColor(ramo.area, bodyStyle));
-                        doc.circle(yearBlockX + 2 + 1.5, tempLeftY + actualRamoHeight / 2, 1.5, 'F'); // Dot
-
                         doc.setTextColor(textColor);
-                        doc.setFontSize(6);
-                        doc.text(ramoText, yearBlockX + 2 + 3, tempLeftY + ramoPadding + (actualRamoHeight - textHeight) / 2);
+                        doc.setFontSize(ramoTextSize);
+                        doc.text(ramoText, yearBlockX + 2 + ramoPadding, tempLeftY + ramoPadding + (actualRamoHeight - textHeight) / 2);
+
+                        // Draw dot to the right of the text
+                        doc.setFillColor(createPdfDotColor(ramo.area, bodyStyle));
+                        doc.circle(yearBlockX + 2 + semesterColumnWidth - ramoDotSize - ramoPadding, tempLeftY + actualRamoHeight / 2, ramoDotSize, 'F'); // Dot
+                        
                         tempLeftY += actualRamoHeight + 1; // 1mm spacing between ramos
                     });
 
@@ -2170,13 +2171,14 @@
                                 doc.line(yearBlockX + semesterColumnWidth + 3, tempRightY, yearBlockX + semesterColumnWidth + 3, tempRightY + actualRamoHeight);
                             }
 
-                            // Draw dot
-                            doc.setFillColor(createPdfDotColor(ramo.area, bodyStyle));
-                            doc.circle(yearBlockX + semesterColumnWidth + 3 + 1.5, tempRightY + actualRamoHeight / 2, 1.5, 'F');
-
                             doc.setTextColor(textColor);
-                            doc.setFontSize(6);
-                            doc.text(ramoText, yearBlockX + semesterColumnWidth + 3 + 3, tempRightY + ramoPadding + (actualRamoHeight - textHeight) / 2);
+                            doc.setFontSize(ramoTextSize);
+                            doc.text(ramoText, yearBlockX + semesterColumnWidth + 3 + ramoPadding, tempRightY + ramoPadding + (actualRamoHeight - textHeight) / 2);
+
+                            // Draw dot to the right of the text
+                            doc.setFillColor(createPdfDotColor(ramo.area, bodyStyle));
+                            doc.circle(yearBlockX + semesterColumnWidth + 3 + semesterColumnWidth - ramoDotSize - ramoPadding, tempRightY + actualRamoHeight / 2, ramoDotSize, 'F');
+                            
                             tempRightY += actualRamoHeight + 1;
                         });
                     }
