@@ -1406,11 +1406,14 @@
   <!-- Script para jsPDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-  <script>
+  <!-- Firebase SDKs -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
     // Referencias a los elementos del DOM
     const ramos = document.querySelectorAll('.ramo'),
-          get   = k=>JSON.parse(localStorage.getItem(k))||[], // Obtiene datos del localStorage
-          set   = (k,v)=>localStorage.setItem(k,JSON.stringify(v)), // Guarda datos en el localStorage
           busc  = document.getElementById('buscador'),
           areaF = document.getElementById('area-filter'),
           zoomR = document.getElementById('zoom'),
@@ -1469,13 +1472,108 @@
     const nextMonthBtn = document.getElementById('next-month');
     const calendarGrid = document.getElementById('calendar-grid');
 
-    // Variables de estado
-    let aprobados = new Set(get('aprobados')), // Conjunto de ramos aprobados
-        totalRamos = ramos.length, // Total de ramos en la malla
-        completedSem = new Set(get('completedSem')), // Semestres completados (para alertas), cargado de localStorage
-        completedYear = new Set(get('completedYear')); // Años completados (para alertas), cargado de localStorage
+    // Firebase variables
+    const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+    let userId = null; // Will store the current user's ID
+    let aprobados = new Set(); // Conjunto de ramos aprobados
+    let totalRamos = ramos.length; // Total de ramos en la malla
+    let completedSem = new Set(); // Semestres completados (para alertas)
+    let completedYear = new Set(); // Años completados (para alertas)
 
     let currentCalendarDate = new Date(); // Current date for the calendar
+
+    // Function to save data to Firestore
+    async function saveDataToFirestore() {
+        if (!userId) {
+            console.warn("No user ID available to save data.");
+            return;
+        }
+        try {
+            await setDoc(doc(db, `artifacts/${appId}/users/${userId}/malla_progress`, 'user_progress'), {
+                aprobados: [...aprobados],
+                completedSem: [...completedSem],
+                completedYear: [...completedYear],
+                theme: localStorage.getItem('theme') || 'light'
+            });
+            console.log("Progreso guardado en Firestore.");
+        } catch (e) {
+            console.error("Error guardando progreso en Firestore:", e);
+            showCustomAlert("Error al guardar el progreso en la nube.");
+        }
+    }
+
+    // Function to load data from Firestore
+    function loadDataFromFirestore() {
+        if (!userId) {
+            console.warn("No user ID available to load data.");
+            return;
+        }
+
+        const docRef = doc(db, `artifacts/${appId}/users/${userId}/malla_progress`, 'user_progress');
+        onSnapshot(docRef, (docSnap) => {
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                aprobados = new Set(data.aprobados || []);
+                completedSem = new Set(data.completedSem || []);
+                completedYear = new Set(data.completedYear || []);
+
+                // Apply theme from loaded data
+                const loadedTheme = data.theme || 'light';
+                document.body.classList.remove('light', 'dark', 'pastel', 'celeste', 'rosado', 'verde');
+                document.body.classList.add(loadedTheme);
+                themeSelector.value = loadedTheme;
+                localStorage.setItem('theme', loadedTheme); // Also update local storage for consistency
+
+                updateUI();
+                console.log("Progreso cargado de Firestore.");
+            } else {
+                console.log("No hay progreso guardado para este usuario en Firestore. Iniciando con datos vacíos.");
+                // If no data exists in Firestore, clear local state and update UI
+                aprobados.clear();
+                completedSem.clear();
+                completedYear.clear();
+                document.querySelectorAll('.year').forEach(y => y.removeAttribute('data-year-complete'));
+                updateUI();
+            }
+        }, (error) => {
+            console.error("Error al escuchar cambios en Firestore:", error);
+            showCustomAlert("Error al cargar el progreso de la nube.");
+        });
+    }
+
+    // Firebase Authentication State Listener
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            userId = user.uid;
+            console.log("Usuario autenticado con ID:", userId);
+            // Display userId on the UI
+            const userIdDisplay = document.createElement('span');
+            userIdDisplay.id = 'user-id-display';
+            userIdDisplay.textContent = `ID de Usuario: ${userId}`;
+            const headerRight = document.getElementById('header-right');
+            if (headerRight && !document.getElementById('user-id-display')) {
+                headerRight.prepend(userIdDisplay); // Add user ID to header
+            }
+            loadDataFromFirestore(); // Load data for the authenticated user
+        } else {
+            // No user signed in, attempt anonymous sign-in or handle as unauthenticated
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Error during initial authentication:", error);
+                showCustomAlert("Error al iniciar sesión. Algunas funciones pueden no estar disponibles.");
+            }
+        }
+    });
 
     // Función para actualizar el reloj en el encabezado
     function updateClock(){
@@ -1500,6 +1598,7 @@
       // Añade la nueva clase de tema
       document.body.classList.add(e.target.value);
       localStorage.setItem('theme', e.target.value);
+      saveDataToFirestore(); // Save theme change to Firestore
     });
 
     // Lógica para el zoom de la malla
@@ -1587,7 +1686,7 @@
         if(aproS === hijos.length && hijos.length > 0 && !completedSem.has(sem)){
           showSemesterCompleteModal(`¡Felicidades, sobreviviste al ${sem}° semestre!`);
           completedSem.add(sem);
-          set('completedSem', [...completedSem]); // Guarda el estado actualizado
+          // No need to set to localStorage here, as saveDataToFirestore will handle it
         }
       });
 
@@ -1617,25 +1716,22 @@
             y.setAttribute('data-year-complete',''); // Añade un atributo para el estilo visual
             showSemesterCompleteModal(`¡Felicidades, completaste el ${year}° año!`);
             completedYear.add(year);
-            set('completedYear', [...completedYear]); // Guarda el estado actualizado
+            // No need to set to localStorage here, as saveDataToFirestore will handle it
           }
         }
       });
     }
 
-    // Función para mostrar un modal de alerta personalizado (se mantiene el alert() por ahora)
-    // NOTA: Esta función ya no se usa para completar semestre/año, ahora se usa showSemesterCompleteModal
+    // Función para mostrar un modal de alerta personalizado
     function showCustomAlert(message) {
-        // Reemplazando alert() con un modal personalizado para mejor UX
-        const customAlertModal = document.getElementById('tr-nico-message-modal'); // Reutilizando este modal
+        const customAlertModal = document.getElementById('tr-nico-message-modal');
         const modalTitle = customAlertModal.querySelector('.modal-title');
         const modalMessage = customAlertModal.querySelector('p');
         
-        modalTitle.textContent = "Información"; // Título genérico para alertas
+        modalTitle.textContent = "Información";
         modalMessage.textContent = message;
         customAlertModal.classList.add('show');
 
-        // Cerrar el modal al hacer clic en el botón o fuera de él
         const closeBtn = customAlertModal.querySelector('.modal-close-button');
         const okBtn = customAlertModal.querySelector('#tr-nico-modal-close-btn');
         const closeHandler = () => {
@@ -1709,7 +1805,7 @@
         }
     });
 
-    modalBtnAprobado.addEventListener('click', () => {
+    modalBtnAprobado.addEventListener('click', async () => {
         if (currentRamoElement) {
             const code = currentRamoElement.dataset.code;
             const deps = currentRamoElement.dataset.req ? currentRamoElement.dataset.req.split(',') : [];
@@ -1722,18 +1818,18 @@
                 currentRamoElement.addEventListener('animationend', () => currentRamoElement.classList.remove('error'), { once: true });
             } else {
                 aprobados.add(code);
-                set('aprobados', [...aprobados]);
+                await saveDataToFirestore(); // Save to Firestore
                 updateUI();
                 hideRamoInfoModal();
             }
         }
     });
 
-    modalBtnDesmarcar.addEventListener('click', () => {
+    modalBtnDesmarcar.addEventListener('click', async () => {
         if (currentRamoElement) {
             const code = currentRamoElement.dataset.code;
             cascadeRemove(code);
-            set('aprobados', [...aprobados]);
+            await saveDataToFirestore(); // Save to Firestore
             updateUI();
             hideRamoInfoModal();
         }
@@ -1782,17 +1878,24 @@
     }
 
     // Manejador de clic para el botón "Reiniciar"
-    function reset(){
-      showCustomConfirm('¿Estás seguro de que quieres reiniciar todo el progreso? Esto no se puede deshacer.', () => {
-        localStorage.removeItem('aprobados'); // Elimina los datos de aprobados
-        localStorage.removeItem('completedSem'); // Elimina semestres completados
-        localStorage.removeItem('completedYear'); // Elimina años completados
-        aprobados.clear(); // Limpia el conjunto de aprobados
-        completedSem.clear(); // Limpia los semestres completados
-        completedYear.clear(); // Limpia los años completados
-        document.querySelectorAll('.year').forEach(y => y.removeAttribute('data-year-complete')); // Quita el atributo visual de año completo
-        updateUI(); // Actualiza la interfaz de usuario
-        hideCustomConfirm();
+    async function reset(){
+      showCustomConfirm('¿Estás seguro de que quieres reiniciar todo el progreso? Esto no se puede deshacer.', async () => {
+        try {
+            await deleteDoc(doc(db, `artifacts/${appId}/users/${userId}/malla_progress`, 'user_progress'));
+            console.log("Progreso eliminado de Firestore.");
+            // Clear local state after successful deletion
+            aprobados.clear();
+            completedSem.clear();
+            completedYear.clear();
+            document.querySelectorAll('.year').forEach(y => y.removeAttribute('data-year-complete'));
+            updateUI();
+            showCustomAlert("Progreso reiniciado exitosamente.");
+        } catch (e) {
+            console.error("Error al reiniciar progreso en Firestore:", e);
+            showCustomAlert("Error al reiniciar el progreso en la nube. Inténtalo de nuevo.");
+        } finally {
+            hideCustomConfirm();
+        }
       });
     }
 
@@ -1848,29 +1951,29 @@
     });
 
 
-    // Funciones de Exportar/Importar Progreso
+    // Funciones de Exportar/Importar Progreso (JSON local)
     exportBtn.addEventListener('click', () => {
         const dataToExport = {
             aprobados: [...aprobados],
-            theme: localStorage.getItem('theme') || 'light', // Exportar el tema actual
-            completedSem: [...completedSem], // Exportar semestres completados
-            completedYear: [...completedYear] // Exportar años completados
+            theme: localStorage.getItem('theme') || 'light',
+            completedSem: [...completedSem],
+            completedYear: [...completedYear]
         };
-        const dataStr = JSON.stringify(dataToExport); // Convierte el Set a Array y luego a String JSON
+        const dataStr = JSON.stringify(dataToExport);
         const blob = new Blob([dataStr], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
         a.download = 'progreso_malla_unach.json';
-        document.body.appendChild(a); // Necesario para Firefox
+        document.body.appendChild(a);
         a.click();
-        document.body.removeChild(a); // Limpiar
-        URL.revokeObjectURL(url); // Liberar el objeto URL
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
         showCustomAlert('Progreso exportado exitosamente como "progreso_malla_unach.json"');
     });
 
     importBtn.addEventListener('click', () => {
-        importFile.click(); // Simula el clic en el input de tipo file
+        importFile.click();
     });
 
     importFile.addEventListener('change', (event) => {
@@ -1880,36 +1983,30 @@
         }
 
         const reader = new FileReader();
-        reader.onload = (e) => {
+        reader.onload = async (e) => {
             try {
                 const importedData = JSON.parse(e.target.result);
                 if (importedData && importedData.aprobados && Array.isArray(importedData.aprobados)) {
                     aprobados = new Set(importedData.aprobados);
-                    set('aprobados', [...aprobados]);
-                    
-                    // Importar semestres y años completados
                     completedSem = new Set(importedData.completedSem || []);
-                    set('completedSem', [...completedSem]);
                     completedYear = new Set(importedData.completedYear || []);
-                    set('completedYear', [...completedYear]);
 
-                    document.querySelectorAll('.year').forEach(y => y.removeAttribute('data-year-complete'));
-
-                    // Importar tema si está presente en los datos
+                    // Apply theme from imported data
                     if (importedData.theme) {
                         document.body.classList.remove('light', 'dark', 'pastel', 'celeste', 'rosado', 'verde');
                         document.body.classList.add(importedData.theme);
                         themeSelector.value = importedData.theme;
                         localStorage.setItem('theme', importedData.theme);
                     }
-
+                    
+                    await saveDataToFirestore(); // Save imported data to Firestore
                     updateUI();
                     showCustomAlert('Progreso importado exitosamente.');
                 } else {
                     showCustomAlert('El archivo importado no tiene el formato correcto.');
                 }
             } catch (error) {
-                console.error('Error al parsear el archivo JSON:', error);
+                console.error('Error al parsear o importar el archivo JSON:', error);
                 showCustomAlert('Error al importar el progreso. Asegúrate de que el archivo sea un JSON válido.');
             }
         };
@@ -1928,7 +2025,7 @@
         }
     };
 
-    // Image export functionality (now PDF export)
+    // PDF export functionality
     exportImageBtn.addEventListener('click', async () => {
         const originalButtonText = exportImageBtn.textContent;
         exportImageBtn.textContent = 'Generando PDF...';
@@ -1958,17 +2055,19 @@
 
             // Header content
             const headerHeight = 30; // Height for the header section
-            const logoSize = 15; // Smaller logo for PDF
             const logoX = margin;
-            const logoY = currentY + (headerHeight - logoSize) / 2 - 2; // Centered vertically in header
+            const logoY = currentY + (headerHeight - 15) / 2 - 2; // Centered vertically in header (15mm is targetLogoHeight)
 
-            // Placeholder for logo image (as direct file access is not guaranteed in sandbox)
-            const placeholderLogoUrl = "https://placehold.co/70x70/007bff/ffffff?text=LOGO"; // Example placeholder
+            // Original logo dimensions: 1095 x 288 pixels
+            const originalLogoWidth = 1095;
+            const originalLogoHeight = 288;
+            const targetLogoHeight = 15; // Keep height consistent with other elements
+            const targetLogoWidth = (originalLogoWidth / originalLogoHeight) * targetLogoHeight;
 
-            // Fetch logo as base64 if possible (more robust for general use, but might fail in sandbox)
+            // Fetch logo as base64 if possible
             let logoBase64 = null;
             try {
-                const response = await fetch('logo.png'); // Assuming logo.png is in the root
+                const response = await fetch('logo.png');
                 if (response.ok) {
                     const blob = await response.blob();
                     logoBase64 = await new Promise((resolve) => {
@@ -1978,21 +2077,14 @@
                     });
                 } else {
                     console.warn('Failed to fetch logo.png, using placeholder.');
-                    logoBase64 = placeholderLogoUrl;
+                    logoBase64 = "https://placehold.co/70x70/007bff/ffffff?text=LOGO"; // Example placeholder
                 }
             } catch (e) {
                 console.warn('Error fetching logo.png, using placeholder:', e);
-                logoBase64 = placeholderLogoUrl;
+                logoBase64 = "https://placehold.co/70x70/007bff/ffffff?text=LOGO"; // Example placeholder
             }
 
             if (logoBase64) {
-                // Original logo dimensions: 1095 x 288 pixels
-                // Aspect ratio: 1095 / 288 = 3.795
-                const originalLogoWidth = 1095;
-                const originalLogoHeight = 288;
-                const targetLogoHeight = 15; // Keep height consistent with other elements
-                const targetLogoWidth = (originalLogoWidth / originalLogoHeight) * targetLogoHeight;
-
                 doc.addImage(logoBase64, 'PNG', logoX, logoY, targetLogoWidth, targetLogoHeight);
             }
 
@@ -2104,7 +2196,7 @@
                     doc.setFillColor(ramoBgColor);
                     
                     leftRamos.forEach(ramo => {
-                        const ramoText = doc.splitTextToSize(ramo.name, semesterColumnWidth - (2 * ramoPadding) - 3); // 3 for dot width
+                        const ramoText = doc.splitTextToSize(ramo.name, semesterColumnWidth - (2 * ramoPadding) - (ramoDotSize * 2) - 1); // Adjusted width for dot on right
                         const textHeight = ramoText.length * 2.5; // Estimate text height based on font size
                         const actualRamoHeight = Math.max(ramoHeight, textHeight + 2 * ramoPadding);
 
@@ -2152,7 +2244,7 @@
                         doc.setFillColor(ramoBgColor);
 
                         rightRamos.forEach(ramo => {
-                            const ramoText = doc.splitTextToSize(ramo.name, semesterColumnWidth - (2 * ramoPadding) - 3);
+                            const ramoText = doc.splitTextToSize(ramo.name, semesterColumnWidth - (2 * ramoPadding) - (ramoDotSize * 2) - 1); // Adjusted width for dot on right
                             const textHeight = ramoText.length * 2.5;
                             const actualRamoHeight = Math.max(ramoHeight, textHeight + 2 * ramoPadding);
 
@@ -2259,7 +2351,7 @@
     // Initial render of the calendar
     renderCalendar();
 
-    // Inicialización de la UI al cargar la página
+    // Initial UI update (will be re-triggered by Firestore snapshot)
     updateUI();
   </script>
 </body>
